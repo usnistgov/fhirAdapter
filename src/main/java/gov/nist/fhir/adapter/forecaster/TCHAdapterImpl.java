@@ -112,7 +112,7 @@ public class TCHAdapterImpl implements AdapterImpl {
                     ir.getContained().add(new Patient().setGender(AdministrativeGender.FEMALE));
 
                     ir.getContained().add(immunization);
-ir.
+
                     ir.getRecommendation().add(new ImmunizationRecommendationRecommendationComponent().setDoseNumber(123));
 
                     //  ir.addContained(immunization);
