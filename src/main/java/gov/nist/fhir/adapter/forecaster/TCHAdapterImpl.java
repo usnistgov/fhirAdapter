@@ -5,6 +5,7 @@
  */
 package gov.nist.fhir.adapter.forecaster;
 
+import ca.uhn.fhir.context.FhirContext;
 import gov.nist.fhir.FHIRUtils;
 import java.math.BigInteger;
 import java.text.ParseException;
@@ -16,16 +17,19 @@ import java.util.UUID;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Immunization;
+import org.hl7.fhir.dstu3.model.Immunization.ImmunizationVaccinationProtocolComponent;
 import org.hl7.fhir.dstu3.model.ImmunizationRecommendation;
 import org.hl7.fhir.dstu3.model.ImmunizationRecommendation.ImmunizationRecommendationRecommendationComponent;
 import org.hl7.fhir.dstu3.model.ImmunizationRecommendation.ImmunizationRecommendationRecommendationDateCriterionComponent;
 import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.PositiveIntType;
+import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.codesystems.ImmunizationRecommendationDateCriterion;
-
 
 import org.tch.fc.ConnectFactory;
 import org.tch.fc.ConnectorInterface;
@@ -58,104 +62,105 @@ public class TCHAdapterImpl implements AdapterImpl {
 
         Software software = TCHAdapterImpl.createSoftware(this.getServiceType(), this.getServiceURL());
         TestCase testCase = createTestCase(this.getGender(), this.getDateOfBirth(), this.getAssessmentDate(), this.getImmunizations());
-        List<TestEvent> events = testCase.getTestEventList();
+        // List<TestEvent> events = testCase.getTestEventList();
 
         Parameters parameters = new Parameters();
+        ParametersParameterComponent ppc = new ParametersParameterComponent();
+        //TODO Put in Consts!
+        ppc.setName("ImmunizationRecommendation");
+        ImmunizationRecommendation ir = new ImmunizationRecommendation();
+        ir.setId(UUID.randomUUID().toString());
 
+        parameters.getParameter().add(ppc);
         List<ForecastActual> forecastActualList = getForecasts(software, testCase);
-
-        for (ForecastActual forecastActual : forecastActualList) {
-            ImmunizationRecommendation recommendation = TCHAdapterImpl.createForecastImmunizationRecommendation(forecastActual, this.getGender(), this.getDateOfBirth(), testCase.getTestEventList());
-            
-            
-            
-            
-            
-            parameters.setId(recommendation.getIdentifier().get(0).getValue());
-            
-            // TODO do we need this?
-            //parameters.setFullUrl(recommendation.getImplicitRules());
-
-
-
-        }
-
         if (testCase.getTestEventList() != null) {
+
             for (int i = 0; i < testCase.getTestEventList().size(); i++) {
 
                 TestEvent testEvent = testCase.getTestEventList().get(i);
                 if (testEvent.getEvaluationActualList() != null) {
                     List<EvaluationActual> actuals = testEvent.getEvaluationActualList();
-
-                    BundleEntry entry = FhirFactory.eINSTANCE.createBundleEntry();
-                    ResourceContainer container = FhirFactory.eINSTANCE.createResourceContainer();
-                    Immunization immunization = FhirFactory.eINSTANCE.createImmunization();
-                    CodeableConcept cconcept = FhirFactory.eINSTANCE.createCodeableConcept();
-                    Coding coding = FhirFactory.eINSTANCE.createCoding();
-                    Code code = FhirFactory.eINSTANCE.createCode();
-                    code.setValue(testEvent.getEvent().getVaccineCvx());
+                    CodeableConcept cconcept = new CodeableConcept();
+                    Coding coding = new Coding();
+                    coding.setCode(testEvent.getEvent().getVaccineCvx());
                     cconcept.getCoding().add(coding);
-                    coding.setCode(code);
+                    Immunization immunization = new Immunization();
+                    immunization.setId(UUID.randomUUID().toString());
                     immunization.setVaccineCode(cconcept);
-
+                    immunization.setDate(actuals.get(0).getTestEvent().getEventDate());
                     for (int j = 0; j < actuals.size(); j++) {
                         EvaluationActual actual = actuals.get(j);
-                        ImmunizationVaccinationProtocol ivp = FhirFactory.eINSTANCE.createImmunizationVaccinationProtocol();
-                        CodeableConcept doseValidConcept = ForecastUtil.createCodeableConcept(actual.getDoseValid(), actual.getDoseValid(), null);
+                        ImmunizationVaccinationProtocolComponent ivp = new ImmunizationVaccinationProtocolComponent();
+                        CodeableConcept doseValidConcept = ForecasterUtils.createCodeableConcept(actual.getDoseValid(), actual.getDoseValid(), null);
                         ivp.setDoseStatus(doseValidConcept);
-                        ivp.setSeries(FHIRUtil.convert(actual.getSeriesUsedCode()));
-                        ivp.setDescription(FHIRUtil.convert(actual.getSeriesUsedText()));
-                        ivp.setDoseStatusReason(ForecastUtil.createCodeableConcept(actual.getReasonCode(), actual.getReasonText(), null));
+                        ivp.setSeries(actual.getSeriesUsedCode());
+                        ivp.setDescription(actual.getSeriesUsedText());
+                        ivp.setDoseStatusReason(ForecasterUtils.createCodeableConcept(actual.getReasonCode(), actual.getReasonText(), null));
 
                         // The spec says the Dose Sequence shall be a positive integer,
                         // however, the forecaster sometimes returns a char.  If it is
                         // good we pass it along.  If not, we drop it.                            
                         try {
-                            PositiveInt pi = FhirFactory.eINSTANCE.createPositiveInt();
-                            pi.setValue(new BigInteger(actual.getDoseNumber()));
-                            ivp.setDoseSequence(pi);
+                            PositiveIntType pi = new PositiveIntType();
+                            pi.setValue(Integer.valueOf(actual.getDoseNumber()));
+                            ivp.setDoseSequenceElement(pi);
                         } catch (Exception e) {
+                            //TODO: Throw a warning for bad character?
                         }
-
                         immunization.getVaccinationProtocol().add(ivp);
-
-                        /*Date date = actual.getTestEvent().getEventDate();
-                                
-                                DateTime date = FhirFactory.eINSTANCE.createDateTime();
-                                XMLGregorianCalendar calenderValue = null;
-                                date.setValue(calenderValue);
-                                date = actual.getTestEvent().getEventDate();
-                         */
-                        immunization.setDate(FHIRUtil.convertDateTime(actual.getTestEvent().getEventDate()));
-
                     }
-                    container.setImmunization(immunization);
-                    entry.setResource(container);
-                    bundle.getEntry().add(entry);
+                    ir.getContained().add(new Patient().setGender(AdministrativeGender.FEMALE));
+
+                    ir.getContained().add(immunization);
+ir.
+                    ir.getRecommendation().add(new ImmunizationRecommendationRecommendationComponent().setDoseNumber(123));
+
+                    //  ir.addContained(immunization);
+                    System.out.println(ir.getContained().size());
+                    //Resource resource = new Resource();
+
+                    //ContainedComponent con = new ContainedComponent();
+                    FhirContext ctx = FhirContext.forDstu3();
+                    System.out.println("Current after adding 1 contained = \n" + ctx.newXmlParser().setPrettyPrint(false).encodeResourceToString(ir));
+                    System.out.println("JSON = " + ctx.newJsonParser().encodeResourceToString(ir));
+                    System.out.println("imm = " + ctx.newXmlParser().encodeResourceToString(immunization));
+
                 }
 
             }
-        }
 
+            for (ForecastActual forecastActual : forecastActualList) {
+                //ImmunizationRecommendationRecommendationComponent recommendation = TCHAdapterImpl.createForecastImmunizationRecommendation(forecastActual, this.getGender(), this.getDateOfBirth(), testCase.getTestEventList());
+                ImmunizationRecommendationRecommendationComponent recommendation = TCHAdapterImpl.createImmunizationRecommendationRecommendationComponent(forecastActual);
+                ir.getRecommendation().add(recommendation);
+                // TODO do we need this?
+                //parameters.setFullUrl(recommendation.getImplicitRules());
+                // parameters.setId(recommendation.getIdentifier().get(0).getValue());
+
+            }
+            ppc.setResource(ir);
+        }
+        return parameters;
     }
 
-    public static ImmunizationRecommendation createForecastImmunizationRecommendation(ForecastActual i, AdministrativeGender gender, Date dob,
-            List<TestEvent> events) {
-        ImmunizationRecommendation o = new ImmunizationRecommendation();
+    public static ImmunizationRecommendationRecommendationComponent createForecastImmunizationRecommendationRecommendationComponent(ForecastActual i, List<TestEvent> events) {
+        ImmunizationRecommendationRecommendationComponent o = new ImmunizationRecommendationRecommendationComponent();
         o.setId(UUID.randomUUID().toString());
         Identifier identifier = new Identifier();
         identifier.setValue(UUID.randomUUID().toString());
-        o.getIdentifier().add(identifier);
-        // TODO: Do we need to populate meta?
-        //o.setMeta(createMeta(URIs.FORECAST_IMMUNIZATIONRECOMMENDATION));
 
+        // TODO: Do we need to populate meta and identifier?
+        //o.getIdentifier().add(identifier);
+        //o.setMeta(createMeta(URIs.FORECAST_IMMUNIZATIONRECOMMENDATION));
+        // TODO: No patient info needed here?  Check
+        /*
         Patient patient = new Patient();
         patient.setGender(gender);
         patient.setBirthDate(dob);
         o.getContained().add(patient);
-
-        ImmunizationRecommendationRecommendationComponent irr = createImmunizationRecommendationRecommendationComponent(i);
-        o.getRecommendation().add(irr);
+         */
+        //ImmunizationRecommendationRecommendationComponent irr = createImmunizationRecommendationRecommendationComponent(i);
+        //o.getRecommendation().add(irr);
         return o;
     }
 
@@ -166,7 +171,7 @@ public class TCHAdapterImpl implements AdapterImpl {
         o.setId(UUID.randomUUID().toString());
         o.setDate(i.getDueDate());
         CodeableConcept code = new CodeableConcept();
-        code.setText(i.getVaccineGroup().getVaccineCvx());
+        code.setText(i.getVaccineGroup().getLabel());
 
         Coding coding = new Coding();
 
@@ -174,64 +179,79 @@ public class TCHAdapterImpl implements AdapterImpl {
         code.getCoding().add(coding);
         o.setVaccineCode(code);
 
-        PositiveIntType pi = new PositiveIntType();
-
-        if (i.getDoseNumber() != null && !"".isEmpty()) {
+        if (i.getDoseNumber() != null && !i.getDoseNumber().isEmpty()) {
             try {
-                pi.setValue(new Integer(i.getDoseNumber()));
-                o.setDoseNumberElement(pi);
-
+                o.setDoseNumber(Integer.valueOf(i.getDoseNumber()));
             } catch (Exception e) {
+                System.out.println("Bad dose number");
                 // TODO: Bad Dose value (is supposed to be a positive int!)
             }
-
+        } else {
+            System.out.println("No dose number");
+        }
+        if (i.getAdminStatus() != null) {
             CodeableConcept adminStatus = new CodeableConcept();
             Coding adminStatusCoding = new Coding();
-            adminStatusCoding.setCode(i.getAdminStatus());
+            if (i.getAdminStatus().equalsIgnoreCase("O")) {
+                adminStatusCoding.setCode("overdue");
+            } else if (i.getAdminStatus().equalsIgnoreCase("D")) {
+                adminStatusCoding.setCode("due");
+            }
             adminStatus.getCoding().add(adminStatusCoding);
             o.setForecastStatus(adminStatus);
+        }
+        CodeableConcept forecastStatus = new CodeableConcept();
+        forecastStatus.getCoding().add(FHIRUtils.IMMUNIZATION_RECOMMENDATION_STATUS.DUE.coding);
 
-            CodeableConcept forecastStatus = new CodeableConcept();
-            forecastStatus.getCoding().add(FHIRUtils.IMMUNIZATION_RECOMMENDATION_STATUS.DUE.coding);
-
-            
+        //TODO: Clean up by moving some strings to Consts
+        if (i.getDueDate() != null && !"".equals(i.getDueDate())) {
             ImmunizationRecommendationRecommendationDateCriterionComponent dueCriterion = new ImmunizationRecommendationRecommendationDateCriterionComponent();
             dueCriterion.setValue(i.getDueDate());
             CodeableConcept due = new CodeableConcept();
             Coding dueCode = new Coding();
-            dueCode.setCode("due");            
+            dueCode.setCode("due");
+            dueCode.setSystem("http://hl7.org/fhir/immunization-recommendation-date-criterion");
+            dueCode.setDisplay("Due");
             due.getCoding().add(dueCode);
             dueCriterion.setCode(due);
             o.getDateCriterion().add(dueCriterion);
-            
+
             ImmunizationRecommendationRecommendationDateCriterionComponent earliestCriterion = new ImmunizationRecommendationRecommendationDateCriterionComponent();
             earliestCriterion.setValue(i.getDueDate());
             CodeableConcept earliest = new CodeableConcept();
             Coding earliestCode = new Coding();
-            earliestCode.setCode("earliest");            
+            earliestCode.setCode("earliest");
+            earliestCode.setSystem("http://hl7.org/fhir/immunization-recommendation-date-criterion");
+            earliestCode.setDisplay("Earliest Date");
             earliest.getCoding().add(earliestCode);
             earliestCriterion.setCode(earliest);
             o.getDateCriterion().add(earliestCriterion);
-            
+        }
+
+        if (i.getOverdueDate() != null && !"".equals(i.getOverdueDate())) {
             ImmunizationRecommendationRecommendationDateCriterionComponent overdueCriterion = new ImmunizationRecommendationRecommendationDateCriterionComponent();
             overdueCriterion.setValue(i.getOverdueDate());
             CodeableConcept overdue = new CodeableConcept();
             Coding overdueCode = new Coding();
-            overdueCode.setCode("overdue");            
+            overdueCode.setCode("overdue");
+            overdueCode.setSystem("http://hl7.org/fhir/immunization-recommendation-date-criterion");
+            overdueCode.setDisplay("Past Due Date");
             overdue.getCoding().add(overdueCode);
             overdueCriterion.setCode(overdue);
             o.getDateCriterion().add(overdueCriterion);
-            
+
             ImmunizationRecommendationRecommendationDateCriterionComponent latestCriterion = new ImmunizationRecommendationRecommendationDateCriterionComponent();
             latestCriterion.setValue(i.getOverdueDate());
             CodeableConcept latest = new CodeableConcept();
             Coding latestCode = new Coding();
-            latestCode.setCode("latest");            
+            latestCode.setCode("latest");
+            latestCode.setSystem("http://hl7.org/fhir/immunization-recommendation-date-criterion");
+            latestCode.setDisplay("Latest");
             latest.getCoding().add(latestCode);
             latestCriterion.setCode(latest);
             o.getDateCriterion().add(latestCriterion);
-            
-            /*
+        }
+        /*
             
             ImmunizationRecommendationDateCriterion dueCriterion = createImmunizationRecommendationDateCriterionComponent(
                     FHIRUtils.IMMUNIZATION_RECOMMENDATION_DATE_CRITERION.DUE, i.getDueDate());
@@ -246,12 +266,11 @@ public class TCHAdapterImpl implements AdapterImpl {
             ImmunizationRecommendationDateCriterion latestCriterion = createImmunizationRecommendationDateCriterion(
                     FHIRUtils.IMMUNIZATION_RECOMMENDATION_DATE_CRITERION.LATEST, i.getOverdueDate());
             o.getDateCriterion().add(latestCriterion);
-*/
-  
-        }
-          return o;
+         */
+        return o;
     }
-/*
+
+    /*
     public static ImmunizationRecommendationDateCriterion createImmunizationRecommendationDateCriterionComponent(
             FHIRUtils.IMMUNIZATION_RECOMMENDATION_DATE_CRITERION crit, java.util.Date date) {
         ImmunizationRecommendationRecommendationDateCriterionComponent dateCriterion = new ImmunizationRecommendationRecommendationDateCriterionComponent();
@@ -272,7 +291,7 @@ public class TCHAdapterImpl implements AdapterImpl {
 
         return dateCriterion;
     }
-*/
+     */
     public static Software createSoftware(String type, String url) {
         Software software = new Software();
         software.setServiceUrl(url);

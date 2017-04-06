@@ -57,7 +57,9 @@ public class ImmunizationRecommendationProvider implements IResourceProvider {
         Parameters inputParameters = (Parameters) bodyFhir;                        
         System.out.println("POST PARSING = \n" + ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(inputParameters));
         
-        return ForecasterUtils.run(inputParameters);
+        Parameters outputParameters = ForecasterUtils.run(inputParameters);
+        System.out.println("Sending back = \n" + ctx.newXmlParser().setPrettyPrint(false).encodeResourceToString(outputParameters));
+        return outputParameters;
         
         
         

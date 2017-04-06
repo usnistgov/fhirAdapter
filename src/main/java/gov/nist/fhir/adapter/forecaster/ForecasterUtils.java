@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Immunization;
@@ -34,12 +37,13 @@ public class ForecasterUtils {
         List<Immunization> imms = ForecasterUtils.parseImmunizations(inputParameters);
         String serviceType = ForecasterUtils.parseServiceType(inputParameters);
         String serviceURL = ForecasterUtils.parseServiceURL(inputParameters);
-        
+
         AdapterImpl adapter = null;
-        if(serviceType.equalsIgnoreCase("TCH"))
+        if (serviceType.equalsIgnoreCase("TCH")) {
             adapter = new TCHAdapterImpl();
-        else
+        } else {
             return null;
+        }
 
         adapter.setAssessmentDate(assessmentDate);
         adapter.setDateOfBirth(dob);
@@ -47,9 +51,21 @@ public class ForecasterUtils {
         adapter.setImmunizations(imms);
         adapter.setServiceType(serviceType);
         adapter.setServiceURL(serviceURL);
+
+        return adapter.run();
         
-        
-        
+    }
+
+    public static CodeableConcept createCodeableConcept(java.lang.String code, java.lang.String text,
+            java.lang.String uri) {
+        CodeableConcept cc = new CodeableConcept();
+        Coding coding = new Coding();
+        coding.setId(UUID.randomUUID().toString());        
+        coding.setSystem(uri);
+        coding.setDisplay(text);
+        coding.setCode(code);                
+        cc.getCoding().add(coding);
+        return cc;
     }
 
     public static ParametersParameterComponent parseSingleParametersParameterComponent(Parameters inputParameters, String parameterName) {
@@ -137,33 +153,38 @@ public class ForecasterUtils {
         }
         return immunizations;
     }
-    
+
     //todo: make this more efficient with next method?
     public static String parseServiceType(Parameters inputParameters) {
         ParametersParameterComponent serviceTypePC = ForecasterUtils.parseSingleParametersParameterComponent(inputParameters, Consts.PARAMETER_NAME_SERVICE_TYPE);
-        if(serviceTypePC == null)
+        if (serviceTypePC == null) {
             return null;
+        }
         Type value = serviceTypePC.getValue();
-        if(value == null)
+        if (value == null) {
             return null;
-        if(!(value instanceof StringType))
+        }
+        if (!(value instanceof StringType)) {
             return null;
+        }
         StringType stringType = (StringType) value;
-        return stringType.getValue();        
+        return stringType.getValue();
     }
 
     public static String parseServiceURL(Parameters inputParameters) {
         ParametersParameterComponent serviceURLPC = ForecasterUtils.parseSingleParametersParameterComponent(inputParameters, Consts.PARAMETER_NAME_SERVICE_URL);
-        if(serviceURLPC == null)
+        if (serviceURLPC == null) {
             return null;
+        }
         Type value = serviceURLPC.getValue();
-        if(value == null)
+        if (value == null) {
             return null;
-        if(!(value instanceof StringType))
+        }
+        if (!(value instanceof StringType)) {
             return null;
+        }
         StringType stringType = (StringType) value;
-        return stringType.getValue();        
+        return stringType.getValue();
     }
 
-    
 }
