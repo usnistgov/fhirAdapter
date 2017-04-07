@@ -28,7 +28,9 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.PositiveIntType;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.dstu3.model.codesystems.ImmunizationRecommendationDateCriterion;
 
 import org.tch.fc.ConnectFactory;
@@ -69,7 +71,7 @@ public class TCHAdapterImpl implements AdapterImpl {
         //TODO Put in Consts!
         ppc.setName("ImmunizationRecommendation");
         ImmunizationRecommendation ir = new ImmunizationRecommendation();
-        ir.setId(UUID.randomUUID().toString());
+        //ir.setId(UUID.randomUUID().toString());
 
         parameters.getParameter().add(ppc);
         List<ForecastActual> forecastActualList = getForecasts(software, testCase);
@@ -85,9 +87,12 @@ public class TCHAdapterImpl implements AdapterImpl {
                     coding.setCode(testEvent.getEvent().getVaccineCvx());
                     cconcept.getCoding().add(coding);
                     Immunization immunization = new Immunization();
-                    immunization.setId(UUID.randomUUID().toString());
+                   // immunization.setId(UUID.randomUUID().toString());
                     immunization.setVaccineCode(cconcept);
                     immunization.setDate(actuals.get(0).getTestEvent().getEventDate());
+//                    immunization.setNotGiven(false);
+                    immunization.setPrimarySource(false);
+                    immunization.setStatus(Immunization.ImmunizationStatus.COMPLETED);
                     for (int j = 0; j < actuals.size(); j++) {
                         EvaluationActual actual = actuals.get(j);
                         ImmunizationVaccinationProtocolComponent ivp = new ImmunizationVaccinationProtocolComponent();
@@ -108,23 +113,33 @@ public class TCHAdapterImpl implements AdapterImpl {
                             //TODO: Throw a warning for bad character?
                         }
                         immunization.getVaccinationProtocol().add(ivp);
+
                     }
+
+                    Reference supportingImm = new Reference();
+                    supportingImm.setResource(immunization);
+                    
+                    ImmunizationRecommendationRecommendationComponent irrc = new ImmunizationRecommendationRecommendationComponent();
+                    irrc.addSupportingImmunization(supportingImm);
+
+                    ir.addRecommendation(irrc);
+                    /*
                     ir.getContained().add(new Patient().setGender(AdministrativeGender.FEMALE));
 
                     ir.getContained().add(immunization);
 
                     ir.getRecommendation().add(new ImmunizationRecommendationRecommendationComponent().setDoseNumber(123));
-
+*/
                     //  ir.addContained(immunization);
                     System.out.println(ir.getContained().size());
                     //Resource resource = new Resource();
-
+/*
                     //ContainedComponent con = new ContainedComponent();
                     FhirContext ctx = FhirContext.forDstu3();
                     System.out.println("Current after adding 1 contained = \n" + ctx.newXmlParser().setPrettyPrint(false).encodeResourceToString(ir));
                     System.out.println("JSON = " + ctx.newJsonParser().encodeResourceToString(ir));
                     System.out.println("imm = " + ctx.newXmlParser().encodeResourceToString(immunization));
-
+                     */
                 }
 
             }
@@ -132,6 +147,7 @@ public class TCHAdapterImpl implements AdapterImpl {
             for (ForecastActual forecastActual : forecastActualList) {
                 //ImmunizationRecommendationRecommendationComponent recommendation = TCHAdapterImpl.createForecastImmunizationRecommendation(forecastActual, this.getGender(), this.getDateOfBirth(), testCase.getTestEventList());
                 ImmunizationRecommendationRecommendationComponent recommendation = TCHAdapterImpl.createImmunizationRecommendationRecommendationComponent(forecastActual);
+
                 ir.getRecommendation().add(recommendation);
                 // TODO do we need this?
                 //parameters.setFullUrl(recommendation.getImplicitRules());
@@ -142,10 +158,10 @@ public class TCHAdapterImpl implements AdapterImpl {
         }
         return parameters;
     }
-
+/*
     public static ImmunizationRecommendationRecommendationComponent createForecastImmunizationRecommendationRecommendationComponent(ForecastActual i, List<TestEvent> events) {
         ImmunizationRecommendationRecommendationComponent o = new ImmunizationRecommendationRecommendationComponent();
-        o.setId(UUID.randomUUID().toString());
+        //o.setId(UUID.randomUUID().toString());
         Identifier identifier = new Identifier();
         identifier.setValue(UUID.randomUUID().toString());
 
@@ -158,17 +174,17 @@ public class TCHAdapterImpl implements AdapterImpl {
         patient.setGender(gender);
         patient.setBirthDate(dob);
         o.getContained().add(patient);
-         */
+         
         //ImmunizationRecommendationRecommendationComponent irr = createImmunizationRecommendationRecommendationComponent(i);
         //o.getRecommendation().add(irr);
         return o;
     }
-
+*/
     public static ImmunizationRecommendationRecommendationComponent createImmunizationRecommendationRecommendationComponent(
             ForecastActual i) {
         ImmunizationRecommendationRecommendationComponent o = new ImmunizationRecommendationRecommendationComponent();
 
-        o.setId(UUID.randomUUID().toString());
+        //o.setId(UUID.randomUUID().toString());
         o.setDate(i.getDueDate());
         CodeableConcept code = new CodeableConcept();
         code.setText(i.getVaccineGroup().getLabel());
@@ -429,6 +445,90 @@ public class TCHAdapterImpl implements AdapterImpl {
      */
     public void setServiceURL(String serviceURL) {
         this.serviceURL = serviceURL;
+    }
+
+    public static void main(String args[]) {
+        /*
+        ImmunizationRecommendation ir = new ImmunizationRecommendation();
+        Immunization imm = new Immunization();
+        imm.setId(UUID.randomUUID().toString());
+        imm.setStatus(Immunization.ImmunizationStatus.NULL);
+        imm.setNotGiven(true);
+        imm.setVaccineCode(new CodeableConcept().addCoding(new Coding().setCode("123")));
+        imm.setPatient(new Reference().setReference("12345"));
+        imm.setPrimarySource(true);
+    Identifier i = new Identifier();
+        i.setUse(Identifier.IdentifierUse.USUAL);
+        i.setSystem("urn:blahblah");
+        i.setValue("ABC123");
+        imm.getIdentifier().add(i);
+        Reference ref = new Reference();
+        ref.setResource(ir);
+        
+        ir.addIdentifier(imm.getIdentifierFirstRep());
+        ir.setId("123");
+        imm.setId("123");
+        ImmunizationRecommendationRecommendationComponent irrc = new ImmunizationRecommendationRecommendationComponent();
+        irrc.getSupportingImmunization().add(ref);
+        ir.addRecommendation(irrc);
+
+        System.out.println(ir.getContained().size());
+        FhirContext ctx = FhirContext.forDstu3();        
+        System.out.println(ctx.newXmlParser().setPrettyPrint(false).encodeResourceToString(ir));
+         */
+
+        // Create an Immunization Resource
+        /*
+ Immunization immunization = new Immunization();
+ 
+ // Set the elements
+
+ immunization.setPrimarySource(false);
+ immunization.setStatus(Immunization.ImmunizationStatus.COMPLETED);
+
+
+ 
+ // Create a Reference and add the resource
+ Reference supportingImmReference = new Reference();
+ supportingImmReference.setResource(immunization);
+ 
+ ImmunizationRecommendationRecommendationComponent irrc = new ImmunizationRecommendationRecommendationComponent();
+ 
+ // Add the reference to the ImmunizationRecommendation Resource
+ irrc.addSupportingImmunization(supportingImmReference);
+ImmunizationRecommendation ir = new ImmunizationRecommendation();
+ ir.addRecommendation(irrc);
+ 
+ // Print it out...
+      FhirContext ctx = FhirContext.forDstu3(); 
+ System.out.println(ctx.newXmlParser().encodeResourceToString(ir));
+ 
+         */
+        // Create an Immunization Resource
+        Immunization immunization = new Immunization();
+
+// Set the elements
+        //immFHIR.setWasNotGiven(false);
+        immunization.setPrimarySource(false);
+        immunization.setStatus(Immunization.ImmunizationStatus.COMPLETED);
+
+        immunization.setVaccineCode(new CodeableConcept().addCoding(new Coding().setCode("55")));
+
+// Create a Reference and add the resource
+        Reference supportingImmReference = new Reference();
+        supportingImmReference.setResource(immunization);
+
+// Add the reference to the ImmunizationRecommendation Resource\
+        ImmunizationRecommendationRecommendationComponent fcastFHIR = new ImmunizationRecommendationRecommendationComponent();
+        fcastFHIR.addSupportingImmunization(supportingImmReference);
+
+        ImmunizationRecommendation ir = new ImmunizationRecommendation();
+        ir.addRecommendation(fcastFHIR);
+        
+// Print it out...
+        FhirContext ctx = FhirContext.forDstu3();
+        System.out.print(ctx.newXmlParser().encodeResourceToString(ir));
+
     }
 
 }
