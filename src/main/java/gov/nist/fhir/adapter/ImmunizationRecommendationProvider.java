@@ -8,20 +8,10 @@ package gov.nist.fhir.adapter;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
-import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import gov.nist.fhir.adapter.forecaster.ForecasterUtils;
 
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.dstu3.model.ImmunizationRecommendation;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -36,7 +26,7 @@ public class ImmunizationRecommendationProvider implements IResourceProvider {
         return Parameters.class;
     }
     
-    @Operation(name="$IR")    
+    @Operation(name="$cds-forecast")    
     //public ImmunizationRecommendation getImmunizationRecommendation(@ResourceParam Parameters parameters, HttpServletRequest request, HttpServletResponse response) {
    public Parameters getImmunizationRecommendation(@ResourceParam String theRawBody) {
 //             public Parameters getImmunizationRecommendation() {
