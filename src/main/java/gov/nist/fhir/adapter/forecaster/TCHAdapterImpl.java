@@ -90,7 +90,8 @@ public class TCHAdapterImpl implements AdapterImpl {
                    // immunization.setId(UUID.randomUUID().toString());
                     immunization.setVaccineCode(cconcept);
                     immunization.setDate(actuals.get(0).getTestEvent().getEventDate());
-//                    immunization.setNotGiven(false);
+                    immunization.setPatient(new Reference().setReference("42"));
+                    immunization.setNotGiven(false);
                     immunization.setPrimarySource(false);
                     immunization.setStatus(Immunization.ImmunizationStatus.COMPLETED);
                     for (int j = 0; j < actuals.size(); j++) {
@@ -98,10 +99,11 @@ public class TCHAdapterImpl implements AdapterImpl {
                         ImmunizationVaccinationProtocolComponent ivp = new ImmunizationVaccinationProtocolComponent();
                         CodeableConcept doseValidConcept = ForecasterUtils.createCodeableConcept(actual.getDoseValid(), actual.getDoseValid(), null);
                         ivp.setDoseStatus(doseValidConcept);
+                        ivp.getTargetDisease().add(new CodeableConcept().setText("unknown"));
                         ivp.setSeries(actual.getSeriesUsedCode());
                         ivp.setDescription(actual.getSeriesUsedText());
                         ivp.setDoseStatusReason(ForecasterUtils.createCodeableConcept(actual.getReasonCode(), actual.getReasonText(), null));
-
+                        ivp.addTargetDisease(new CodeableConcept());
                         // The spec says the Dose Sequence shall be a positive integer,
                         // however, the forecaster sometimes returns a char.  If it is
                         // good we pass it along.  If not, we drop it.                            
@@ -194,7 +196,7 @@ public class TCHAdapterImpl implements AdapterImpl {
         coding.setCode(i.getVaccineGroup().getVaccineCvx());
         code.getCoding().add(coding);
         o.setVaccineCode(code);
-
+        
         if (i.getDoseNumber() != null && !i.getDoseNumber().isEmpty()) {
             try {
                 o.setDoseNumber(Integer.valueOf(i.getDoseNumber()));
@@ -212,9 +214,14 @@ public class TCHAdapterImpl implements AdapterImpl {
                 adminStatusCoding.setCode("overdue");
             } else if (i.getAdminStatus().equalsIgnoreCase("D")) {
                 adminStatusCoding.setCode("due");
+            } else {
+                adminStatusCoding.setCode("unknown");
             }
             adminStatus.getCoding().add(adminStatusCoding);
             o.setForecastStatus(adminStatus);
+        } else {
+            
+            o.setForecastStatus(new CodeableConcept().setText("unknown"));
         }
         CodeableConcept forecastStatus = new CodeableConcept();
         forecastStatus.getCoding().add(FHIRUtils.IMMUNIZATION_RECOMMENDATION_STATUS.DUE.coding);
