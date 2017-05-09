@@ -41,6 +41,10 @@ public class ForecasterUtils {
         AdapterImpl adapter = null;
         if (serviceType.equalsIgnoreCase("TCH")) {
             adapter = new TCHAdapterImpl();
+        } else if(serviceType.equalsIgnoreCase("ICE")) {
+            adapter = new TCHAdapterImpl();
+        } else if(serviceType.equalsIgnoreCase("STC")) {
+            adapter = new TCHAdapterImpl();
         } else {
             return null;
         }
