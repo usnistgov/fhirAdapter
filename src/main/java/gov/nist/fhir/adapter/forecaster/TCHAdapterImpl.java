@@ -225,7 +225,11 @@ public class TCHAdapterImpl implements AdapterImpl {
         }
         CodeableConcept forecastStatus = new CodeableConcept();
         forecastStatus.getCoding().add(FHIRUtils.IMMUNIZATION_RECOMMENDATION_STATUS.DUE.coding);
-
+        System.out.println("Due = " + i.getDueDate());        
+        System.out.println("Finished = " + i.getFinishedDate());
+        System.out.println("OverDue = " + i.getOverdueDate());
+        System.out.println("Valid = " + i.getValidDate());
+        
         //TODO: Clean up by moving some strings to Consts
         if (i.getDueDate() != null && !"".equals(i.getDueDate())) {
             ImmunizationRecommendationRecommendationDateCriterionComponent dueCriterion = new ImmunizationRecommendationRecommendationDateCriterionComponent();
@@ -238,9 +242,10 @@ public class TCHAdapterImpl implements AdapterImpl {
             due.getCoding().add(dueCode);
             dueCriterion.setCode(due);
             o.getDateCriterion().add(dueCriterion);
-
+        }
+        if (i.getValidDate() != null && !"".equals(i.getValidDate())) {
             ImmunizationRecommendationRecommendationDateCriterionComponent earliestCriterion = new ImmunizationRecommendationRecommendationDateCriterionComponent();
-            earliestCriterion.setValue(i.getDueDate());
+            earliestCriterion.setValue(i.getValidDate());
             CodeableConcept earliest = new CodeableConcept();
             Coding earliestCode = new Coding();
             earliestCode.setCode("earliest");
@@ -262,9 +267,11 @@ public class TCHAdapterImpl implements AdapterImpl {
             overdue.getCoding().add(overdueCode);
             overdueCriterion.setCode(overdue);
             o.getDateCriterion().add(overdueCriterion);
-
+        }
+        
+        if (i.getFinishedDate() != null && !"".equals(i.getFinishedDate())) {
             ImmunizationRecommendationRecommendationDateCriterionComponent latestCriterion = new ImmunizationRecommendationRecommendationDateCriterionComponent();
-            latestCriterion.setValue(i.getOverdueDate());
+            latestCriterion.setValue(i.getFinishedDate());
             CodeableConcept latest = new CodeableConcept();
             Coding latestCode = new Coding();
             latestCode.setCode("latest");
