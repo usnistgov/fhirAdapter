@@ -98,7 +98,19 @@ public class TCHAdapterImpl implements AdapterImpl {
                         EvaluationActual actual = actuals.get(j);
                         ImmunizationVaccinationProtocolComponent ivp = new ImmunizationVaccinationProtocolComponent();
                         CodeableConcept doseValidConcept = ForecasterUtils.createCodeableConcept(actual.getDoseValid(), actual.getDoseValid(), null);
-                        ivp.setDoseStatus(doseValidConcept);
+                        CodeableConcept doseStatus = new CodeableConcept();
+                        if("Y".equalsIgnoreCase(doseValidConcept.getCodingFirstRep().getCode())) {
+                            doseStatus.setText("Valid");
+                            Coding code = new Coding();
+                            code.setCode("Valid");
+                            doseStatus.addCoding(code);
+                        } else {
+                            doseStatus.setText("Invalid");
+                            Coding code = new Coding();
+                            code.setCode("Invalid");
+                            doseStatus.addCoding(code);
+                        }
+                        ivp.setDoseStatus(doseStatus);
                         ivp.getTargetDisease().add(new CodeableConcept().setText("unknown"));
                         ivp.setSeries(actual.getSeriesUsedCode());
                         ivp.setDescription(actual.getSeriesUsedText());
@@ -232,13 +244,14 @@ public class TCHAdapterImpl implements AdapterImpl {
         
         //TODO: Clean up by moving some strings to Consts
         if (i.getDueDate() != null && !"".equals(i.getDueDate())) {
+            // It is "due" in TCH, but "recommended" in FHIR
             ImmunizationRecommendationRecommendationDateCriterionComponent dueCriterion = new ImmunizationRecommendationRecommendationDateCriterionComponent();
             dueCriterion.setValue(i.getDueDate());
             CodeableConcept due = new CodeableConcept();
             Coding dueCode = new Coding();
-            dueCode.setCode("due");
+            dueCode.setCode("recommended");
             dueCode.setSystem("http://hl7.org/fhir/immunization-recommendation-date-criterion");
-            dueCode.setDisplay("Due");
+            dueCode.setDisplay("Recommended");
             due.getCoding().add(dueCode);
             dueCriterion.setCode(due);
             o.getDateCriterion().add(dueCriterion);
