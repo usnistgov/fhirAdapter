@@ -105,9 +105,9 @@ public class TCHAdapterImpl implements AdapterImpl {
                             code.setCode("Valid");
                             doseStatus.addCoding(code);
                         } else {
-                            doseStatus.setText("Invalid");
+                            doseStatus.setText("Not Valid");
                             Coding code = new Coding();
-                            code.setCode("Invalid");
+                            code.setCode("not valid");
                             doseStatus.addCoding(code);
                         }
                         ivp.setDoseStatus(doseStatus);
