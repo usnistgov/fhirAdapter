@@ -219,20 +219,52 @@ public class TCHAdapterImpl implements AdapterImpl {
         } else {
             System.out.println("No dose number");
         }
+        
         if (i.getAdminStatus() != null) {
+            System.out.println("Admin Status = " + i.getAdminStatus());
             CodeableConcept adminStatus = new CodeableConcept();
             Coding adminStatusCoding = new Coding();
-            if (i.getAdminStatus().equalsIgnoreCase("O")) {
-                adminStatusCoding.setCode("overdue");
+            if (i.getAdminStatus().equalsIgnoreCase("A")) {
+                adminStatusCoding.setCode("assumed complete or immune");
+            } else if (i.getAdminStatus().equalsIgnoreCase("C")) {
+                adminStatusCoding.setCode("complete");                
             } else if (i.getAdminStatus().equalsIgnoreCase("D")) {
                 adminStatusCoding.setCode("due");
+            } else if(i.getAdminStatus().equalsIgnoreCase("E")) {
+                adminStatusCoding.setCode("error");
+            } else if(i.getAdminStatus().equalsIgnoreCase("F")) {
+                adminStatusCoding.setCode("finished");
+            } else if(i.getAdminStatus().equalsIgnoreCase("G")) {
+                adminStatusCoding.setCode("aged out");
+            } else if(i.getAdminStatus().equalsIgnoreCase("I")) {
+                adminStatusCoding.setCode("immune");                
+            } else if(i.getAdminStatus().equalsIgnoreCase("L")) {
+                adminStatusCoding.setCode("due later");
+            } else if(i.getAdminStatus().equalsIgnoreCase("N")) {
+                adminStatusCoding.setCode("not complete");
+            } else if(i.getAdminStatus().equalsIgnoreCase("O")) {
+                adminStatusCoding.setCode("overdue");
+            } else if(i.getAdminStatus().equalsIgnoreCase("R")) {
+                adminStatusCoding.setCode("no results");
+            } else if(i.getAdminStatus().equalsIgnoreCase("S")) {
+                adminStatusCoding.setCode("complete for season");                
+            } else if(i.getAdminStatus().equalsIgnoreCase("U")) {
+                adminStatusCoding.setCode("unknown");                
+            } else if(i.getAdminStatus().equalsIgnoreCase("V")) {
+                adminStatusCoding.setCode("Consider");
+            } else if(i.getAdminStatus().equalsIgnoreCase("W")) {
+                adminStatusCoding.setCode("waivered");
+            } else if(i.getAdminStatus().equalsIgnoreCase("X")) {
+                adminStatusCoding.setCode("contraindicated");
+            } else if(i.getAdminStatus().equalsIgnoreCase("Z")) {
+                adminStatusCoding.setCode("recommended but not required");
             } else {
-                adminStatusCoding.setCode("unknown");
-            }
+                System.out.println("Admin status not recognized = " + i.getAdminStatus());
+            }            
             adminStatus.getCoding().add(adminStatusCoding);
             o.setForecastStatus(adminStatus);
-        } else {
-            
+        } else {            
+            System.out.println("No admin status");
             o.setForecastStatus(new CodeableConcept().setText("unknown"));
         }
         CodeableConcept forecastStatus = new CodeableConcept();
