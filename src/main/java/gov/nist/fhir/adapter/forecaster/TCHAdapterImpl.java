@@ -111,7 +111,10 @@ public class TCHAdapterImpl implements AdapterImpl {
                             doseStatus.addCoding(code);
                         }
                         ivp.setDoseStatus(doseStatus);
-                        ivp.getTargetDisease().add(new CodeableConcept().setText("unknown"));
+                        //ivp.getTargetDisease().add(new CodeableConcept().setText("unknown"));
+                        Coding cvxCoding = new Coding();
+                        cvxCoding.setCode(actual.getSeriesUsedCode());
+                        ivp.getTargetDisease().add(new CodeableConcept().addCoding(cvxCoding));
                         ivp.setSeries(actual.getSeriesUsedCode());
                         ivp.setDescription(actual.getSeriesUsedText());
                         ivp.setDoseStatusReason(ForecasterUtils.createCodeableConcept(actual.getReasonCode(), actual.getReasonText(), null));
