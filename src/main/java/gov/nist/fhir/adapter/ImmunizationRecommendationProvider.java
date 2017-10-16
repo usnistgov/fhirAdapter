@@ -50,4 +50,11 @@ public class ImmunizationRecommendationProvider implements IResourceProvider {
         return outputParameters;
 
     }
+    
+    public static final void main(String[] args) {
+        
+        
+        
+    }
+    
 }

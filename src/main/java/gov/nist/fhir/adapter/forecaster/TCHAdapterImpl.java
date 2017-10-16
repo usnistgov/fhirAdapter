@@ -373,7 +373,11 @@ public class TCHAdapterImpl implements AdapterImpl {
     public static Software createSoftware(String type, String url) {
         Software software = new Software();
         software.setServiceUrl(url);
-        Service service = Service.getService(type);
+        Service service = null;
+        if(type.equalsIgnoreCase("MA"))
+            service = Service.SWP;
+        else            
+            service = Service.getService(type);
         software.setService(service);
         return software;
     }

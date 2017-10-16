@@ -45,6 +45,10 @@ public class ForecasterUtils {
             adapter = new TCHAdapterImpl();
         } else if(serviceType.equalsIgnoreCase("STC")) {
             adapter = new TCHAdapterImpl();
+        } else if(serviceType.equalsIgnoreCase("SWP")) {
+            adapter = new TCHAdapterImpl();
+        } else if(serviceType.equalsIgnoreCase("MA")) {
+            adapter = new TCHAdapterImpl();            
         } else {
             return null;
         }
@@ -191,4 +195,14 @@ public class ForecasterUtils {
         return stringType.getValue();
     }
 
+    public static final void main(String[] args) {
+        /*
+        Parameters inputParameters = new Parameters();
+        ParametersParameterComponent service = new ParametersParameterComponent();
+        service.set
+        inputParameters.a
+        Parameters returned = ForecasterUtils.run(inputParameters); 
+        */
+    }
+    
 }
