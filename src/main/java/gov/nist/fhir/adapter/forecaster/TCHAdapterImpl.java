@@ -58,11 +58,20 @@ public class TCHAdapterImpl implements AdapterImpl {
     private List<Immunization> immunizations = null;
     private String serviceType = null;
     private String serviceURL = null;
+    private String userId = null;
+    private String facilityId = null;
+    private String password = null;
 
     @Override
     public Parameters run() {
 
-        Software software = TCHAdapterImpl.createSoftware(this.getServiceType(), this.getServiceURL());
+//<<<<<<< HEAD
+//        Software software = TCHAdapterImpl.createSoftware(this.getServiceType(), this.getServiceURL());
+//=======
+//        System.out.println("HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! SERVICE TYPE " + this.getServiceType());
+        
+        Software software = TCHAdapterImpl.createSoftware(this.getServiceType(), this.getServiceURL(), this.getUserId(), this.getFacilityId(), this.getPassword());
+//>>>>>>> 92a3d17... Imported new TCH code and expanded for connection via HL7/IIS
         TestCase testCase = createTestCase(this.getGender(), this.getDateOfBirth(), this.getAssessmentDate(), this.getImmunizations());
         // List<TestEvent> events = testCase.getTestEventList();
 
@@ -94,6 +103,7 @@ public class TCHAdapterImpl implements AdapterImpl {
                     immunization.setNotGiven(false);
                     immunization.setPrimarySource(false);
                     immunization.setStatus(Immunization.ImmunizationStatus.COMPLETED);
+                    System.out.println("EvaluationActual size = " + actuals.size());
                     for (int j = 0; j < actuals.size(); j++) {
                         EvaluationActual actual = actuals.get(j);
                         ImmunizationVaccinationProtocolComponent ivp = new ImmunizationVaccinationProtocolComponent();
@@ -164,7 +174,7 @@ public class TCHAdapterImpl implements AdapterImpl {
             for (ForecastActual forecastActual : forecastActualList) {
                 //ImmunizationRecommendationRecommendationComponent recommendation = TCHAdapterImpl.createForecastImmunizationRecommendation(forecastActual, this.getGender(), this.getDateOfBirth(), testCase.getTestEventList());
                 ImmunizationRecommendationRecommendationComponent recommendation = TCHAdapterImpl.createImmunizationRecommendationRecommendationComponent(forecastActual);
-
+    //            System.out.println("recommendation = " + recommendation.toString());
                 ir.getRecommendation().add(recommendation);
                 // TODO do we need this?
                 //parameters.setFullUrl(recommendation.getImplicitRules());
@@ -370,15 +380,23 @@ public class TCHAdapterImpl implements AdapterImpl {
         return dateCriterion;
     }
      */
-    public static Software createSoftware(String type, String url) {
-        Software software = new Software();
+    public static Software createSoftware(String type, String url, String userId, String facilityId, String password) {
+        Software software = new Software();        
         software.setServiceUrl(url);
         Service service = null;
         if(type.equalsIgnoreCase("MA"))
             service = Service.SWP;
-        else            
+        else if(type.equalsIgnoreCase("HL7"))
+            service = Service.IIS;
+        else
             service = Service.getService(type);
         software.setService(service);
+        software.setServiceUserid(userId);
+        software.setServiceFacilityid(facilityId);
+        software.setServicePassword(password);
+        System.out.println("UserID = " + userId);
+        System.out.println("FacilityID = " + facilityId);       
+        System.out.println("Type = " + type);
         return software;
     }
 
@@ -544,7 +562,7 @@ public class TCHAdapterImpl implements AdapterImpl {
          */
 
         // Create an Immunization Resource
-        /*
+        
  Immunization immunization = new Immunization();
  
  // Set the elements
@@ -569,7 +587,8 @@ ImmunizationRecommendation ir = new ImmunizationRecommendation();
       FhirContext ctx = FhirContext.forDstu3(); 
  System.out.println(ctx.newXmlParser().encodeResourceToString(ir));
  
-         */
+         
+        /*
         // Create an Immunization Resource
         Immunization immunization = new Immunization();
 
@@ -594,7 +613,49 @@ ImmunizationRecommendation ir = new ImmunizationRecommendation();
 // Print it out...
         FhirContext ctx = FhirContext.forDstu3();
         System.out.print(ctx.newXmlParser().encodeResourceToString(ir));
+*/
+    }
 
+    /**
+     * @return the userId
+     */
+    public String getUserId() {
+        return userId;
+    }
+
+    /**
+     * @param userId the userId to set
+     */
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    /**
+     * @return the facilityId
+     */
+    public String getFacilityId() {
+        return facilityId;
+    }
+
+    /**
+     * @param facilityId the facilityId to set
+     */
+    public void setFacilityId(String facilityId) {
+        this.facilityId = facilityId;
+    }
+
+    /**
+     * @return the password
+     */
+    public String getPassword() {
+        return password;
+    }
+
+    /**
+     * @param password the password to set
+     */
+    public void setPassword(String password) {
+        this.password = password;
     }
 
 }

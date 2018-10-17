@@ -39,6 +39,9 @@ public class ForecasterUtils {
         String serviceURL = ForecasterUtils.parseServiceURL(inputParameters);
 
         AdapterImpl adapter = null;
+        
+        // No longer needed
+        /*
         if (serviceType.equalsIgnoreCase("TCH")) {
             adapter = new TCHAdapterImpl();
         } else if(serviceType.equalsIgnoreCase("ICE")) {
@@ -51,8 +54,9 @@ public class ForecasterUtils {
             adapter = new TCHAdapterImpl();            
         } else {
             return null;
-        }
-
+        } */
+        adapter = new TCHAdapterImpl();            
+        
         adapter.setAssessmentDate(assessmentDate);
         adapter.setDateOfBirth(dob);
         adapter.setGender(gender);

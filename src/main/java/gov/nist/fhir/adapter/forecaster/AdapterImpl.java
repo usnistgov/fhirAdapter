@@ -74,4 +74,14 @@ public interface AdapterImpl {
     public String getServiceURL();
     public void setServiceURL(String serviceURL);
     
+    public String getUserId();
+    public void setUserId(String userId);
+    
+    public String getFacilityId();
+    public void setFacilityId(String facilityId);
+    
+    public String getPassword();
+    public void setPassword(String password);
+    
+    
 }
