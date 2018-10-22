@@ -98,7 +98,9 @@ public class TCHAdapterImpl implements AdapterImpl {
                     Immunization immunization = new Immunization();
                    // immunization.setId(UUID.randomUUID().toString());
                     immunization.setVaccineCode(cconcept);
-                    immunization.setDate(actuals.get(0).getTestEvent().getEventDate());
+                    if (actuals.get(0) != null && actuals.get(0).getTestEvent() != null ) {
+                        immunization.setDate(actuals.get(0).getTestEvent().getEventDate());
+                    }
                     immunization.setPatient(new Reference().setReference("42"));
                     immunization.setNotGiven(false);
                     immunization.setPrimarySource(false);
@@ -214,11 +216,14 @@ public class TCHAdapterImpl implements AdapterImpl {
         //o.setId(UUID.randomUUID().toString());
         o.setDate(i.getDueDate());
         CodeableConcept code = new CodeableConcept();
-        code.setText(i.getVaccineGroup().getLabel());
-
+        if(i.getVaccineGroup() != null) {
+            code.setText(i.getVaccineGroup().getLabel());
+        }
         Coding coding = new Coding();
 
-        coding.setCode(i.getVaccineGroup().getVaccineCvx());
+        if(i.getVaccineGroup() != null) {
+            coding.setCode(i.getVaccineGroup().getVaccineCvx());
+        }
         code.getCoding().add(coding);
         o.setVaccineCode(code);
         
@@ -390,13 +395,14 @@ public class TCHAdapterImpl implements AdapterImpl {
             service = Service.IIS;
         else
             service = Service.getService(type);
+        
         software.setService(service);
         software.setServiceUserid(userId);
         software.setServiceFacilityid(facilityId);
         software.setServicePassword(password);
         System.out.println("UserID = " + userId);
         System.out.println("FacilityID = " + facilityId);       
-        System.out.println("Type = " + type);
+        System.out.println("Type = " + type + " / " + service);
         return software;
     }
 
