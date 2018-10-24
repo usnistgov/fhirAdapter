@@ -22,18 +22,12 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Type;
-import org.tch.fc.model.ForecastEngineIssue;
-import org.tch.fc.model.ForecastEngineIssueLevel;
-import org.tch.fc.model.ForecastEngineIssueType;
 
 /**
  *
  * @author mccaffrey
  */
 public class ForecasterUtils {
-
-    public static final String ISSUEDIVIDER = "$$$$$$$";
-    public static final String SUBISSUEDIVIDER = "&&&&&&&";
 
     public static Parameters run(Parameters inputParameters) {
 
@@ -43,15 +37,11 @@ public class ForecasterUtils {
         List<Immunization> imms = ForecasterUtils.parseImmunizations(inputParameters);
         String serviceType = ForecasterUtils.parseServiceType(inputParameters);
         String serviceURL = ForecasterUtils.parseServiceURL(inputParameters);
-        String userId = ForecasterUtils.parseUserId(inputParameters);
-        String facilityId = ForecasterUtils.parseFacilityId(inputParameters);
-        String password = ForecasterUtils.parsePassword(inputParameters);
 
         AdapterImpl adapter = null;
+        
+        // No longer needed
         /*
-        
-        No longer needed 9/11/2018
-        
         if (serviceType.equalsIgnoreCase("TCH")) {
             adapter = new TCHAdapterImpl();
         } else if(serviceType.equalsIgnoreCase("ICE")) {
@@ -64,32 +54,28 @@ public class ForecasterUtils {
             adapter = new TCHAdapterImpl();            
         } else {
             return null;
-        }
-         */
-        adapter = new TCHAdapterImpl();
-
+        } */
+        adapter = new TCHAdapterImpl();            
+        
         adapter.setAssessmentDate(assessmentDate);
         adapter.setDateOfBirth(dob);
         adapter.setGender(gender);
         adapter.setImmunizations(imms);
         adapter.setServiceType(serviceType);
         adapter.setServiceURL(serviceURL);
-        adapter.setUserId(userId);
-        adapter.setFacilityId(facilityId);
-        adapter.setPassword(password);
 
         return adapter.run();
-
+        
     }
 
     public static CodeableConcept createCodeableConcept(java.lang.String code, java.lang.String text,
             java.lang.String uri) {
         CodeableConcept cc = new CodeableConcept();
         Coding coding = new Coding();
-        coding.setId(UUID.randomUUID().toString());
+        coding.setId(UUID.randomUUID().toString());        
         coding.setSystem(uri);
         coding.setDisplay(text);
-        coding.setCode(code);
+        coding.setCode(code);                
         cc.getCoding().add(coding);
         return cc;
     }
@@ -180,7 +166,7 @@ public class ForecasterUtils {
         return immunizations;
     }
 
-    //todo: make this more efficient with next method? This was fine when there was just one thing to parse... not when there are several
+    //todo: make this more efficient with next method?
     public static String parseServiceType(Parameters inputParameters) {
         ParametersParameterComponent serviceTypePC = ForecasterUtils.parseSingleParametersParameterComponent(inputParameters, Consts.PARAMETER_NAME_SERVICE_TYPE);
         if (serviceTypePC == null) {
@@ -213,114 +199,6 @@ public class ForecasterUtils {
         return stringType.getValue();
     }
 
-    public static String parseUserId(Parameters inputParameters) {
-        ParametersParameterComponent userIdPC = ForecasterUtils.parseSingleParametersParameterComponent(inputParameters, Consts.PARAMETER_NAME_USER_ID);
-        if (userIdPC == null) {
-            return null;
-        }
-        Type value = userIdPC.getValue();
-        if (value == null) {
-            return null;
-        }
-        if (!(value instanceof StringType)) {
-            return null;
-        }
-        StringType stringType = (StringType) value;
-        return stringType.getValue();
-    }
-
-    public static String parseFacilityId(Parameters inputParameters) {
-        ParametersParameterComponent facilityIdPC = ForecasterUtils.parseSingleParametersParameterComponent(inputParameters, Consts.PARAMETER_NAME_FACILITY_ID);
-        if (facilityIdPC == null) {
-            return null;
-        }
-        Type value = facilityIdPC.getValue();
-        if (value == null) {
-            return null;
-        }
-        if (!(value instanceof StringType)) {
-            return null;
-        }
-        StringType stringType = (StringType) value;
-        return stringType.getValue();
-    }
-
-    public static String parsePassword(Parameters inputParameters) {
-        ParametersParameterComponent passwordPC = ForecasterUtils.parseSingleParametersParameterComponent(inputParameters, Consts.PARAMETER_NAME_PASSWORD);
-        if (passwordPC == null) {
-            return null;
-        }
-        Type value = passwordPC.getValue();
-        if (value == null) {
-            return null;
-        }
-        if (!(value instanceof StringType)) {
-            return null;
-        }
-        StringType stringType = (StringType) value;
-        return stringType.getValue();
-    }
-
-    public static String convertIssuesToString(List<ForecastEngineIssue> issues) {
-        if (issues == null) {
-            return "";
-        }
-        StringBuilder string = new StringBuilder();
-        Iterator<ForecastEngineIssue> it = issues.iterator();
-        while (it.hasNext()) {
-
-            ForecastEngineIssue issue = it.next();
-            string.append(issue.getIssueLevel().toString());
-            string.append(ForecasterUtils.SUBISSUEDIVIDER);
-            string.append(issue.getIssueType().toString());
-            string.append(ForecasterUtils.SUBISSUEDIVIDER);
-            string.append(issue.getDescription());
-            string.append(ForecasterUtils.ISSUEDIVIDER);
-
-        }
-        return string.toString();
-    }
-
-    public static List<ForecastEngineIssue> convertStringToIssues(String string) {
-        if (string == null) {
-            return new ArrayList<>();
-        }
-
-        List<ForecastEngineIssue> feIssues = new ArrayList<>();
-
-        String issues[] = string.split(ForecasterUtils.ISSUEDIVIDER);
-
-        for (int i = 0; i < issues.length; i++) {
-            ForecastEngineIssue issue = new ForecastEngineIssue();
-            String issueString = issues[i];
-            String subIssue[] = issueString.split(ForecasterUtils.SUBISSUEDIVIDER);
-            issue.setIssueLevel(ForecastEngineIssueLevel.valueOf(subIssue[0]));
-System.out.println("subissue = " + subIssue[1]);
-            switch (subIssue[1]) {
-
-                case "MATCH_NOT_FOUND":
-                    issue.setIssueType(ForecastEngineIssueType.MATCH_NOT_FOUND);
-                    break;
-                case "AUTHENTICATION_FAILURE":
-                    issue.setIssueType(ForecastEngineIssueType.AUTHENTICATION_FAILURE);
-                    break;
-                case "ENGINE_NOT_AVAILABLE":
-                    issue.setIssueType(ForecastEngineIssueType.ENGINE_NOT_AVAILABLE);
-                    break;
-                case "UNEXPECTED_FORMAT":
-                    issue.setIssueType(ForecastEngineIssueType.UNEXPECTED_FORMAT);
-                    break;
-                default:
-
-            }          
-            issue.setDescription(subIssue[2]);
-            feIssues.add(issue);
-        }
-
-        return feIssues;
-
-    }
-
     public static final void main(String[] args) {
         /*
         Parameters inputParameters = new Parameters();
@@ -328,29 +206,7 @@ System.out.println("subissue = " + subIssue[1]);
         service.set
         inputParameters.a
         Parameters returned = ForecasterUtils.run(inputParameters); 
-         */
-
-        List<ForecastEngineIssue> feIssues1 = new ArrayList<>();
-
-        ForecastEngineIssue issue1 = new ForecastEngineIssue();
-        issue1.setIssueType(ForecastEngineIssueType.MATCH_NOT_FOUND);
-        issue1.setIssueLevel(ForecastEngineIssueLevel.ERROR);
-        issue1.setDescription("Bad thing 1");
-        feIssues1.add(issue1);
-
-        ForecastEngineIssue issue2 = new ForecastEngineIssue();
-        issue2.setIssueType(ForecastEngineIssueType.ENGINE_NOT_AVAILABLE);
-        issue2.setIssueLevel(ForecastEngineIssueLevel.WARNING);
-        issue2.setDescription("Bad thing 2");
-        feIssues1.add(issue2);
-
-        String outputString1 = ForecasterUtils.convertIssuesToString(feIssues1);
-        System.out.println(outputString1);
-
-        List<ForecastEngineIssue> feIssues2 = ForecasterUtils.convertStringToIssues(outputString1);
-        String outputString2 = ForecasterUtils.convertIssuesToString(feIssues2);
-        System.out.println(outputString2);
-
+        */
     }
-
+    
 }

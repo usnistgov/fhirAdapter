@@ -31,7 +31,6 @@ import org.hl7.fhir.dstu3.model.PositiveIntType;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
-import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.codesystems.ImmunizationRecommendationDateCriterion;
 
 import org.tch.fc.ConnectFactory;
@@ -40,7 +39,6 @@ import org.tch.fc.model.EvaluationActual;
 import org.tch.fc.model.Event;
 import org.tch.fc.model.EventType;
 import org.tch.fc.model.ForecastActual;
-import org.tch.fc.model.ForecastEngineIssue;
 import org.tch.fc.model.Service;
 import org.tch.fc.model.Software;
 import org.tch.fc.model.SoftwareResult;
@@ -67,6 +65,11 @@ public class TCHAdapterImpl implements AdapterImpl {
     @Override
     public Parameters run() {
 
+//<<<<<<< HEAD
+//        Software software = TCHAdapterImpl.createSoftware(this.getServiceType(), this.getServiceURL());
+//=======
+//        System.out.println("HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! SERVICE TYPE " + this.getServiceType());
+        
         Software software = TCHAdapterImpl.createSoftware(this.getServiceType(), this.getServiceURL(), this.getUserId(), this.getFacilityId(), this.getPassword());
         TestCase testCase = createTestCase(this.getGender(), this.getDateOfBirth(), this.getAssessmentDate(), this.getImmunizations());
         // List<TestEvent> events = testCase.getTestEventList();
@@ -79,21 +82,7 @@ public class TCHAdapterImpl implements AdapterImpl {
         //ir.setId(UUID.randomUUID().toString());
 
         parameters.getParameter().add(ppc);
-        //List<ForecastActual> forecastActualList = getForecasts(software, testCase);
-
-        FullResults results = getForecasts(software, testCase);
-        List<ForecastActual> forecastActualList = results.getResults();
-        String tchLog = results.getTchLog();
-
-        ParametersParameterComponent ppcLog = new ParametersParameterComponent();
-        //TODO Put in Consts!
-        ppcLog.setName("TCHLog");
-
-        StringType tchLogStringType = new StringType();
-        tchLogStringType.setValueAsString(tchLog);
-        ppcLog.setValue(tchLogStringType);
-
-        parameters.getParameter().add(ppcLog);
+        List<ForecastActual> forecastActualList = getForecasts(software, testCase);
         if (testCase.getTestEventList() != null) {
 
             for (int i = 0; i < testCase.getTestEventList().size(); i++) {
@@ -106,21 +95,22 @@ public class TCHAdapterImpl implements AdapterImpl {
                     coding.setCode(testEvent.getEvent().getVaccineCvx());
                     cconcept.getCoding().add(coding);
                     Immunization immunization = new Immunization();
-                    // immunization.setId(UUID.randomUUID().toString());
+                   // immunization.setId(UUID.randomUUID().toString());
                     immunization.setVaccineCode(cconcept);
-                    if (actuals.get(0) != null && actuals.get(0).getTestEvent() != null) {
+                    if (actuals.get(0) != null && actuals.get(0).getTestEvent() != null ) {
                         immunization.setDate(actuals.get(0).getTestEvent().getEventDate());
                     }
                     immunization.setPatient(new Reference().setReference("42"));
                     immunization.setNotGiven(false);
                     immunization.setPrimarySource(false);
                     immunization.setStatus(Immunization.ImmunizationStatus.COMPLETED);
+                    System.out.println("EvaluationActual size = " + actuals.size());
                     for (int j = 0; j < actuals.size(); j++) {
                         EvaluationActual actual = actuals.get(j);
                         ImmunizationVaccinationProtocolComponent ivp = new ImmunizationVaccinationProtocolComponent();
                         CodeableConcept doseValidConcept = ForecasterUtils.createCodeableConcept(actual.getDoseValid(), actual.getDoseValid(), null);
                         CodeableConcept doseStatus = new CodeableConcept();
-                        if ("Y".equalsIgnoreCase(doseValidConcept.getCodingFirstRep().getCode())) {
+                        if("Y".equalsIgnoreCase(doseValidConcept.getCodingFirstRep().getCode())) {
                             doseStatus.setText("Valid");
                             Coding code = new Coding();
                             code.setCode("Valid");
@@ -156,7 +146,7 @@ public class TCHAdapterImpl implements AdapterImpl {
 
                     Reference supportingImm = new Reference();
                     supportingImm.setResource(immunization);
-
+                    
                     ImmunizationRecommendationRecommendationComponent irrc = new ImmunizationRecommendationRecommendationComponent();
                     irrc.addSupportingImmunization(supportingImm);
 
@@ -167,7 +157,7 @@ public class TCHAdapterImpl implements AdapterImpl {
                     ir.getContained().add(immunization);
 
                     ir.getRecommendation().add(new ImmunizationRecommendationRecommendationComponent().setDoseNumber(123));
-                     */
+*/
                     //  ir.addContained(immunization);
                     System.out.println(ir.getContained().size());
                     //Resource resource = new Resource();
@@ -181,24 +171,22 @@ public class TCHAdapterImpl implements AdapterImpl {
                 }
 
             }
-            if (forecastActualList != null) {
-                for (ForecastActual forecastActual : forecastActualList) {
-                    //ImmunizationRecommendationRecommendationComponent recommendation = TCHAdapterImpl.createForecastImmunizationRecommendation(forecastActual, this.getGender(), this.getDateOfBirth(), testCase.getTestEventList());
-                    ImmunizationRecommendationRecommendationComponent recommendation = TCHAdapterImpl.createImmunizationRecommendationRecommendationComponent(forecastActual);
 
-                    ir.getRecommendation().add(recommendation);
-                    // TODO do we need this?
-                    //parameters.setFullUrl(recommendation.getImplicitRules());
-                    // parameters.setId(recommendation.getIdentifier().get(0).getValue());
+            for (ForecastActual forecastActual : forecastActualList) {
+                //ImmunizationRecommendationRecommendationComponent recommendation = TCHAdapterImpl.createForecastImmunizationRecommendation(forecastActual, this.getGender(), this.getDateOfBirth(), testCase.getTestEventList());
+                ImmunizationRecommendationRecommendationComponent recommendation = TCHAdapterImpl.createImmunizationRecommendationRecommendationComponent(forecastActual);
+    //            System.out.println("recommendation = " + recommendation.toString());
+                ir.getRecommendation().add(recommendation);
+                // TODO do we need this?
+                //parameters.setFullUrl(recommendation.getImplicitRules());
+                // parameters.setId(recommendation.getIdentifier().get(0).getValue());
 
-                }
             }
             ppc.setResource(ir);
         }
         return parameters;
     }
-
-    /*
+/*
     public static ImmunizationRecommendationRecommendationComponent createForecastImmunizationRecommendationRecommendationComponent(ForecastActual i, List<TestEvent> events) {
         ImmunizationRecommendationRecommendationComponent o = new ImmunizationRecommendationRecommendationComponent();
         //o.setId(UUID.randomUUID().toString());
@@ -219,7 +207,7 @@ public class TCHAdapterImpl implements AdapterImpl {
         //o.getRecommendation().add(irr);
         return o;
     }
-     */
+*/
     public static ImmunizationRecommendationRecommendationComponent createImmunizationRecommendationRecommendationComponent(
             ForecastActual i) {
         ImmunizationRecommendationRecommendationComponent o = new ImmunizationRecommendationRecommendationComponent();
@@ -227,19 +215,17 @@ public class TCHAdapterImpl implements AdapterImpl {
         //o.setId(UUID.randomUUID().toString());
         o.setDate(i.getDueDate());
         CodeableConcept code = new CodeableConcept();
-        if (i.getVaccineGroup() != null) {
+        if(i.getVaccineGroup() != null) {
             code.setText(i.getVaccineGroup().getLabel());
         }
         Coding coding = new Coding();
 
-        if (i.getVaccineCvx() != null && !i.getVaccineCvx().isEmpty()) {
-            coding.setCode(i.getVaccineCvx());
-        } else {
+        if(i.getVaccineGroup() != null) {
             coding.setCode(i.getVaccineGroup().getVaccineCvx());
         }
         code.getCoding().add(coding);
         o.setVaccineCode(code);
-
+        
         if (i.getDoseNumber() != null && !i.getDoseNumber().isEmpty()) {
             try {
                 o.setDoseNumber(Integer.valueOf(i.getDoseNumber()));
@@ -250,7 +236,7 @@ public class TCHAdapterImpl implements AdapterImpl {
         } else {
             System.out.println("No dose number");
         }
-
+        
         if (i.getAdminStatus() != null) {
             System.out.println("Admin Status = " + i.getAdminStatus());
             CodeableConcept adminStatus = new CodeableConcept();
@@ -258,53 +244,53 @@ public class TCHAdapterImpl implements AdapterImpl {
             if (i.getAdminStatus().equalsIgnoreCase("A")) {
                 adminStatusCoding.setCode("assumed complete or immune");
             } else if (i.getAdminStatus().equalsIgnoreCase("C")) {
-                adminStatusCoding.setCode("complete");
+                adminStatusCoding.setCode("complete");                
             } else if (i.getAdminStatus().equalsIgnoreCase("D")) {
                 adminStatusCoding.setCode("due");
-            } else if (i.getAdminStatus().equalsIgnoreCase("E")) {
+            } else if(i.getAdminStatus().equalsIgnoreCase("E")) {
                 adminStatusCoding.setCode("error");
-            } else if (i.getAdminStatus().equalsIgnoreCase("F")) {
+            } else if(i.getAdminStatus().equalsIgnoreCase("F")) {
                 adminStatusCoding.setCode("finished");
-            } else if (i.getAdminStatus().equalsIgnoreCase("G")) {
+            } else if(i.getAdminStatus().equalsIgnoreCase("G")) {
                 adminStatusCoding.setCode("aged out");
-            } else if (i.getAdminStatus().equalsIgnoreCase("I")) {
-                adminStatusCoding.setCode("immune");
-            } else if (i.getAdminStatus().equalsIgnoreCase("L")) {
+            } else if(i.getAdminStatus().equalsIgnoreCase("I")) {
+                adminStatusCoding.setCode("immune");                
+            } else if(i.getAdminStatus().equalsIgnoreCase("L")) {
                 adminStatusCoding.setCode("due later");
-            } else if (i.getAdminStatus().equalsIgnoreCase("N")) {
+            } else if(i.getAdminStatus().equalsIgnoreCase("N")) {
                 adminStatusCoding.setCode("not complete");
-            } else if (i.getAdminStatus().equalsIgnoreCase("O")) {
+            } else if(i.getAdminStatus().equalsIgnoreCase("O")) {
                 adminStatusCoding.setCode("overdue");
-            } else if (i.getAdminStatus().equalsIgnoreCase("R")) {
+            } else if(i.getAdminStatus().equalsIgnoreCase("R")) {
                 adminStatusCoding.setCode("no results");
-            } else if (i.getAdminStatus().equalsIgnoreCase("S")) {
-                adminStatusCoding.setCode("complete for season");
-            } else if (i.getAdminStatus().equalsIgnoreCase("U")) {
-                adminStatusCoding.setCode("unknown");
-            } else if (i.getAdminStatus().equalsIgnoreCase("V")) {
+            } else if(i.getAdminStatus().equalsIgnoreCase("S")) {
+                adminStatusCoding.setCode("complete for season");                
+            } else if(i.getAdminStatus().equalsIgnoreCase("U")) {
+                adminStatusCoding.setCode("unknown");                
+            } else if(i.getAdminStatus().equalsIgnoreCase("V")) {
                 adminStatusCoding.setCode("Consider");
-            } else if (i.getAdminStatus().equalsIgnoreCase("W")) {
+            } else if(i.getAdminStatus().equalsIgnoreCase("W")) {
                 adminStatusCoding.setCode("waivered");
-            } else if (i.getAdminStatus().equalsIgnoreCase("X")) {
+            } else if(i.getAdminStatus().equalsIgnoreCase("X")) {
                 adminStatusCoding.setCode("contraindicated");
-            } else if (i.getAdminStatus().equalsIgnoreCase("Z")) {
+            } else if(i.getAdminStatus().equalsIgnoreCase("Z")) {
                 adminStatusCoding.setCode("recommended but not required");
             } else {
                 System.out.println("Admin status not recognized = " + i.getAdminStatus());
-            }
+            }            
             adminStatus.getCoding().add(adminStatusCoding);
             o.setForecastStatus(adminStatus);
-        } else {
+        } else {            
             System.out.println("No admin status");
             o.setForecastStatus(new CodeableConcept().setText("unknown"));
         }
         CodeableConcept forecastStatus = new CodeableConcept();
         forecastStatus.getCoding().add(FHIRUtils.IMMUNIZATION_RECOMMENDATION_STATUS.DUE.coding);
-        System.out.println("Due = " + i.getDueDate());
+        System.out.println("Due = " + i.getDueDate());        
         System.out.println("Finished = " + i.getFinishedDate());
         System.out.println("OverDue = " + i.getOverdueDate());
         System.out.println("Valid = " + i.getValidDate());
-
+        
         //TODO: Clean up by moving some strings to Consts
         if (i.getDueDate() != null && !"".equals(i.getDueDate())) {
             // It is "due" in TCH, but "recommended" in FHIR
@@ -344,7 +330,7 @@ public class TCHAdapterImpl implements AdapterImpl {
             overdueCriterion.setCode(overdue);
             o.getDateCriterion().add(overdueCriterion);
         }
-
+        
         if (i.getFinishedDate() != null && !"".equals(i.getFinishedDate())) {
             ImmunizationRecommendationRecommendationDateCriterionComponent latestCriterion = new ImmunizationRecommendationRecommendationDateCriterionComponent();
             latestCriterion.setValue(i.getFinishedDate());
@@ -399,20 +385,23 @@ public class TCHAdapterImpl implements AdapterImpl {
     }
      */
     public static Software createSoftware(String type, String url, String userId, String facilityId, String password) {
-        Software software = new Software();
+        Software software = new Software();        
         software.setServiceUrl(url);
+        Service service = null;
+        if(type.equalsIgnoreCase("MA"))
+            service = Service.SWP;
+        else if(type.equalsIgnoreCase("HL7"))
+            service = Service.IIS;
+        else
+            service = Service.getService(type);
+        
+        software.setService(service);
         software.setServiceUserid(userId);
         software.setServiceFacilityid(facilityId);
         software.setServicePassword(password);
-        Service service = null;
-        if (type.equalsIgnoreCase("MA")) {
-            service = Service.SWP;
-        } else if (type.equalsIgnoreCase("HL7")) {
-            service = Service.IIS;
-        } else {
-            service = Service.getService(type);
-        }
-        software.setService(service);
+        System.out.println("UserID = " + userId);
+        System.out.println("FacilityID = " + facilityId);       
+        System.out.println("Type = " + type + " / " + service);
         return software;
     }
 
@@ -451,30 +440,16 @@ public class TCHAdapterImpl implements AdapterImpl {
         return events;
     }
 
-    // static List<ForecastActual> getForecasts(Software software, TestCase testCase) {
-    static FullResults getForecasts(Software software, TestCase testCase) {
-        FullResults results = new FullResults();
+    static List<ForecastActual> getForecasts(Software software, TestCase testCase) {
         List<ForecastActual> forecastActualList = null;
-        String log = "";
-        List<ForecastEngineIssue> issues = new ArrayList<>();
         try {
             ConnectorInterface connector = ConnectFactory.createConnecter(software, VaccineGroup.getForecastItemList());
-            SoftwareResult result = new SoftwareResult();
-            connector.setLogText(true);
-            forecastActualList = connector.queryForForecast(testCase, result);
-            //System.out.println("TCH log = " + result.getLogText());             
-            log = result.getLogText();
-
-            issues = result.getIssueList();
-
+            forecastActualList = connector.queryForForecast(testCase, new SoftwareResult());
         } catch (Exception e) {
             e.printStackTrace();
             //todo: error handling
         }
-        results.setResults(forecastActualList);
-        results.setTchLog(log);
-        results.setIssues(issues);
-        return results;
+        return forecastActualList;
     }
 
     /**
@@ -592,7 +567,7 @@ public class TCHAdapterImpl implements AdapterImpl {
          */
 
         // Create an Immunization Resource
-        /*
+        
  Immunization immunization = new Immunization();
  
  // Set the elements
@@ -617,7 +592,8 @@ ImmunizationRecommendation ir = new ImmunizationRecommendation();
       FhirContext ctx = FhirContext.forDstu3(); 
  System.out.println(ctx.newXmlParser().encodeResourceToString(ir));
  
-         */
+         
+        /*
         // Create an Immunization Resource
         Immunization immunization = new Immunization();
 
@@ -638,11 +614,11 @@ ImmunizationRecommendation ir = new ImmunizationRecommendation();
 
         ImmunizationRecommendation ir = new ImmunizationRecommendation();
         ir.addRecommendation(fcastFHIR);
-
+        
 // Print it out...
         FhirContext ctx = FhirContext.forDstu3();
         System.out.print(ctx.newXmlParser().encodeResourceToString(ir));
-
+*/
     }
 
     /**
