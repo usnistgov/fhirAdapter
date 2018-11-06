@@ -6,6 +6,7 @@
 package gov.nist.fhir.adapter.forecaster;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.primitive.IdDt;
 import gov.nist.fhir.FHIRUtils;
 import java.math.BigInteger;
 import java.text.ParseException;
@@ -13,9 +14,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
+
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.Element;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Identifier;
@@ -24,6 +26,7 @@ import org.hl7.fhir.dstu3.model.Immunization.ImmunizationVaccinationProtocolComp
 import org.hl7.fhir.dstu3.model.ImmunizationRecommendation;
 import org.hl7.fhir.dstu3.model.ImmunizationRecommendation.ImmunizationRecommendationRecommendationComponent;
 import org.hl7.fhir.dstu3.model.ImmunizationRecommendation.ImmunizationRecommendationRecommendationDateCriterionComponent;
+import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -103,7 +106,11 @@ public class TCHAdapterImpl implements AdapterImpl {
                     List<EvaluationActual> actuals = testEvent.getEvaluationActualList();
                     CodeableConcept cconcept = new CodeableConcept();
                     Coding coding = new Coding();
-                    coding.setCode(testEvent.getEvent().getVaccineCvx());
+                    if (testEvent.getEvent().getVaccineCvx() != null && !testEvent.getEvent().getVaccineCvx().isEmpty()) {
+                        coding.setCode(testEvent.getEvent().getVaccineCvx());
+                    } else {
+                        coding.setCode(testEvent.getEvent().getVaccineMvx());
+                    }
                     cconcept.getCoding().add(coding);
                     Immunization immunization = new Immunization();
                     // immunization.setId(UUID.randomUUID().toString());
@@ -413,6 +420,10 @@ public class TCHAdapterImpl implements AdapterImpl {
             service = Service.getService(type);
         }
         software.setService(service);
+        System.out.println("User ID" + software.getServiceUserid());
+        System.out.println("Password" + software.getServicePassword());
+        System.out.println("Facility ID" + software.getServiceFacilityid());
+        System.out.println("Service" + software.getService());
         return software;
     }
 
@@ -437,14 +448,36 @@ public class TCHAdapterImpl implements AdapterImpl {
         while (it.hasNext()) {
             i++;
             Immunization imm = it.next();
-            //TODO: Error checking
-            String code = imm.getVaccineCode().getCoding().get(0).getCode();
+
+            String cvxCode = null;
+            if (imm.getVaccineCode() != null && imm.getVaccineCode().getCoding() != null && imm.getVaccineCode().getCoding().get(0) != null) {
+                cvxCode = imm.getVaccineCode().getCoding().get(0).getCode();
+            }
+
+            String mvxCode = null;
+
+            if (imm.getManufacturer() != null) {
+                List<Resource> resources = imm.getContained();
+                Iterator<Resource> it2 = resources.iterator();
+                while (it2.hasNext()) {
+                    Resource resource = it2.next();
+                    if(resource instanceof Organization) {
+                        Organization mvxOrg = (Organization) resource;                     
+                        mvxCode = mvxOrg.getIdentifierFirstRep().getValue();
+                    }                    
+                }
+            }
+
             Date date = imm.getDate();
 
             TestEvent testEvent = new TestEvent(i, date);
             Event event = new Event();
             event.setEventType(EventType.VACCINATION);
-            event.setVaccineCvx(code);
+            event.setVaccineCvx(cvxCode);
+            event.setVaccineMvx(mvxCode);
+
+            System.out.println("CVX = " + event.getVaccineCvx());
+            System.out.println("MVX = " + event.getVaccineMvx());
             testEvent.setEvent(event);
             events.add(testEvent);
         }

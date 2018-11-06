@@ -37,6 +37,11 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>org.tch.fc</groupId>
+            <artifactId>ForecastConnector</artifactId>
+            <version>3.13</version>
+        </dependency>
+        <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-web-api</artifactId>
             <version>7.0</version>
@@ -61,11 +66,6 @@
             <groupId>ca.uhn.hapi.fhir</groupId>
             <artifactId>hapi-fhir-jpaserver-base</artifactId>
             <version>2.3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.tch.fc</groupId>
-            <artifactId>ForecastConnector</artifactId>
-            <version>3.13</version>
         </dependency>
         
         <!--
