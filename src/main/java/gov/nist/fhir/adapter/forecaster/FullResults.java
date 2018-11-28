@@ -19,6 +19,7 @@ public class FullResults {
     private List<ForecastActual> results = null;
     private String tchLog = null;
     private List<ForecastEngineIssue> issues = null;
+    private String softwareResultStatus = null;
 
     /**
      * @return the results
@@ -66,5 +67,19 @@ public class FullResults {
      */
     public void setIssues(List<ForecastEngineIssue> issues) {
         this.issues = issues;
+    }
+
+    /**
+     * @return the softwareResultStatus
+     */
+    public String getSoftwareResultStatus() {
+        return softwareResultStatus;
+    }
+
+    /**
+     * @param softwareResultStatus the softwareResultStatus to set
+     */
+    public void setSoftwareResultStatus(String softwareResultStatus) {
+        this.softwareResultStatus = softwareResultStatus;
     }
 }

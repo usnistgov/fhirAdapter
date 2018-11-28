@@ -97,6 +97,20 @@ public class TCHAdapterImpl implements AdapterImpl {
         ppcLog.setValue(tchLogStringType);
 
         parameters.getParameter().add(ppcLog);
+        
+        String srs = results.getSoftwareResultStatus();
+
+        ParametersParameterComponent ppcSrs = new ParametersParameterComponent();
+        //TODO Put in Consts!
+        ppcSrs.setName("SoftwareResultsStatus");
+
+        StringType srsStringType = new StringType();
+        srsStringType.setValueAsString(srs);
+        ppcSrs.setValue(srsStringType);
+
+        parameters.getParameter().add(ppcSrs);
+
+        
         if (testCase.getTestEventList() != null) {
 
             for (int i = 0; i < testCase.getTestEventList().size(); i++) {
@@ -117,6 +131,9 @@ public class TCHAdapterImpl implements AdapterImpl {
                     immunization.setVaccineCode(cconcept);
                     if (actuals.get(0) != null && actuals.get(0).getTestEvent() != null) {
                         immunization.setDate(actuals.get(0).getTestEvent().getEventDate());
+                        System.out.println("There was a test event -- date pulled.");
+                    } else {
+                        System.out.println("There was NOT a test event -- date NOT pulled.");
                     }
                     immunization.setPatient(new Reference().setReference("42"));
                     immunization.setNotGiven(false);
@@ -416,6 +433,8 @@ public class TCHAdapterImpl implements AdapterImpl {
             service = Service.SWP;
         } else if (type.equalsIgnoreCase("HL7")) {
             service = Service.IIS;
+        } else if (type.equalsIgnoreCase("SWP")) {
+            service = Service.MDS;
         } else {
             service = Service.getService(type);
         }
@@ -490,6 +509,7 @@ public class TCHAdapterImpl implements AdapterImpl {
         List<ForecastActual> forecastActualList = null;
         String log = "";
         List<ForecastEngineIssue> issues = new ArrayList<>();
+        String srs = "";
         try {
             ConnectorInterface connector = ConnectFactory.createConnecter(software, VaccineGroup.getForecastItemList());
             SoftwareResult result = new SoftwareResult();
@@ -497,9 +517,11 @@ public class TCHAdapterImpl implements AdapterImpl {
             forecastActualList = connector.queryForForecast(testCase, result);
             //System.out.println("TCH log = " + result.getLogText());             
             log = result.getLogText();
-
+            
             issues = result.getIssueList();
-
+            System.out.println("Software Results Status = " + result.getSoftwareResultStatus());
+            srs = result.getSoftwareResultStatus().toString();
+            
         } catch (Exception e) {
             e.printStackTrace();
             //todo: error handling
@@ -507,6 +529,8 @@ public class TCHAdapterImpl implements AdapterImpl {
         results.setResults(forecastActualList);
         results.setTchLog(log);
         results.setIssues(issues);
+        results.setSoftwareResultStatus(srs);
+        System.out.println("Software Results Status = " + srs);
         return results;
     }
 
