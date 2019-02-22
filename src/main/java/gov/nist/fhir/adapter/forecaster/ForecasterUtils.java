@@ -297,7 +297,7 @@ public class ForecasterUtils {
             issue.setIssueLevel(ForecastEngineIssueLevel.valueOf(subIssue[0]));
 System.out.println("subissue = " + subIssue[1]);
             switch (subIssue[1]) {
-
+/*
                 case "MATCH_NOT_FOUND":
                     issue.setIssueType(ForecastEngineIssueType.MATCH_NOT_FOUND);
                     break;
@@ -307,6 +307,7 @@ System.out.println("subissue = " + subIssue[1]);
                 case "ENGINE_NOT_AVAILABLE":
                     issue.setIssueType(ForecastEngineIssueType.ENGINE_NOT_AVAILABLE);
                     break;
+*/
                 case "UNEXPECTED_FORMAT":
                     issue.setIssueType(ForecastEngineIssueType.UNEXPECTED_FORMAT);
                     break;
@@ -331,7 +332,7 @@ System.out.println("subissue = " + subIssue[1]);
          */
 
         List<ForecastEngineIssue> feIssues1 = new ArrayList<>();
-
+/*
         ForecastEngineIssue issue1 = new ForecastEngineIssue();
         issue1.setIssueType(ForecastEngineIssueType.MATCH_NOT_FOUND);
         issue1.setIssueLevel(ForecastEngineIssueLevel.ERROR);
@@ -343,7 +344,7 @@ System.out.println("subissue = " + subIssue[1]);
         issue2.setIssueLevel(ForecastEngineIssueLevel.WARNING);
         issue2.setDescription("Bad thing 2");
         feIssues1.add(issue2);
-
+*/
         String outputString1 = ForecasterUtils.convertIssuesToString(feIssues1);
         System.out.println(outputString1);
 

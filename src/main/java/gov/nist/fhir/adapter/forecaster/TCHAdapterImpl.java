@@ -149,12 +149,19 @@ public class TCHAdapterImpl implements AdapterImpl {
                             Coding code = new Coding();
                             code.setCode("Valid");
                             doseStatus.addCoding(code);
-                        } else {
+                        } else if("N".equalsIgnoreCase(doseValidConcept.getCodingFirstRep().getCode())) {
                             doseStatus.setText("Not Valid");
                             Coding code = new Coding();
                             code.setCode("not valid");
+                            doseStatus.addCoding(code);                            
+                        } else {
+                            // 2019/3/13: If it isn't Y or N, leave it blank
+                            doseStatus.setText(" ");
+                            Coding code = new Coding();
+                            code.setCode(" ");
                             doseStatus.addCoding(code);
                         }
+                    
                         ivp.setDoseStatus(doseStatus);
                         //ivp.getTargetDisease().add(new CodeableConcept().setText("unknown"));
                         Coding cvxCoding = new Coding();

@@ -39,7 +39,7 @@
         <dependency>
             <groupId>org.tch.fc</groupId>
             <artifactId>ForecastConnector</artifactId>
-            <version>3.13</version>
+            <version>3.14</version>
         </dependency>
         <dependency>
             <groupId>javax</groupId>
