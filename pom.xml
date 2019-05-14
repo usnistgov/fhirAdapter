@@ -37,10 +37,10 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.tch.fc</groupId>
+            <groupId>org.immregistries.vfa</groupId>
             <artifactId>ForecastConnector</artifactId>
-            <version>3.14</version>
-        </dependency>
+            <version>3.15</version>
+        </dependency> 
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-web-api</artifactId>
@@ -75,21 +75,21 @@
                     <scope>provided</scope>
                 </dependency>
         
-        <dependency>
-            <groupId>ca.uhn.hapi.fhir</groupId>
-            <artifactId>hapi-fhir-testpage-overlay</artifactId>
-            <version>${project.version}</version>
-            <type>war</type>
-            <scope>provided</scope>         
-        </dependency>
-        <dependency>
-            <groupId>ca.uhn.hapi.fhir</groupId>
-            <artifactId>hapi-fhir-testpage-overlay</artifactId>
-            <version>${project.version}</version>
-            <classifier>classes</classifier>
-            <scope>provided</scope>         
-        </dependency>
--->
+                <dependency>
+                    <groupId>ca.uhn.hapi.fhir</groupId>
+                    <artifactId>hapi-fhir-testpage-overlay</artifactId>
+                    <version>${project.version}</version>
+                    <type>war</type>
+                    <scope>provided</scope>         
+                </dependency>
+                <dependency>
+                    <groupId>ca.uhn.hapi.fhir</groupId>
+                    <artifactId>hapi-fhir-testpage-overlay</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>classes</classifier>
+                    <scope>provided</scope>         
+                </dependency>
+        -->
 
     
 

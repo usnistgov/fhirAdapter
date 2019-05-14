@@ -7,8 +7,8 @@ package gov.nist.fhir.adapter.forecaster;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.tch.fc.model.ForecastActual;
-import org.tch.fc.model.ForecastEngineIssue;
+import org.immregistries.vfa.connect.model.ForecastActual;
+import org.immregistries.vfa.connect.model.ForecastEngineIssue;
 
 /**
  *

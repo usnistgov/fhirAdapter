@@ -22,9 +22,9 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Type;
-import org.tch.fc.model.ForecastEngineIssue;
-import org.tch.fc.model.ForecastEngineIssueLevel;
-import org.tch.fc.model.ForecastEngineIssueType;
+import org.immregistries.vfa.connect.model.ForecastEngineIssue;
+import org.immregistries.vfa.connect.model.ForecastEngineIssueLevel;
+import org.immregistries.vfa.connect.model.ForecastEngineIssueType;
 
 /**
  *

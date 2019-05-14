@@ -37,19 +37,19 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.codesystems.ImmunizationRecommendationDateCriterion;
 
-import org.tch.fc.ConnectFactory;
-import org.tch.fc.ConnectorInterface;
-import org.tch.fc.model.EvaluationActual;
-import org.tch.fc.model.Event;
-import org.tch.fc.model.EventType;
-import org.tch.fc.model.ForecastActual;
-import org.tch.fc.model.ForecastEngineIssue;
-import org.tch.fc.model.Service;
-import org.tch.fc.model.Software;
-import org.tch.fc.model.SoftwareResult;
-import org.tch.fc.model.TestCase;
-import org.tch.fc.model.TestEvent;
-import org.tch.fc.model.VaccineGroup;
+import org.immregistries.vfa.connect.ConnectFactory;
+import org.immregistries.vfa.connect.ConnectorInterface;
+import org.immregistries.vfa.connect.model.EvaluationActual;
+import org.immregistries.vfa.connect.model.Event;
+import org.immregistries.vfa.connect.model.EventType;
+import org.immregistries.vfa.connect.model.ForecastActual;
+import org.immregistries.vfa.connect.model.ForecastEngineIssue;
+import org.immregistries.vfa.connect.model.Service;
+import org.immregistries.vfa.connect.model.Software;
+import org.immregistries.vfa.connect.model.SoftwareResult;
+import org.immregistries.vfa.connect.model.TestCase;
+import org.immregistries.vfa.connect.model.TestEvent;
+import org.immregistries.vfa.connect.model.VaccineGroup;
 
 /**
  *
@@ -442,6 +442,8 @@ public class TCHAdapterImpl implements AdapterImpl {
             service = Service.IIS;
         } else if (type.equalsIgnoreCase("SWP")) {
             service = Service.MDS;
+        } else if (type.equalsIgnoreCase("TCH")) {
+            service = Service.LSVF;
         } else {
             service = Service.getService(type);
         }
