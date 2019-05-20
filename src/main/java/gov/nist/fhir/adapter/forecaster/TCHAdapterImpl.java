@@ -97,7 +97,7 @@ public class TCHAdapterImpl implements AdapterImpl {
         ppcLog.setValue(tchLogStringType);
 
         parameters.getParameter().add(ppcLog);
-        
+
         String srs = results.getSoftwareResultStatus();
 
         ParametersParameterComponent ppcSrs = new ParametersParameterComponent();
@@ -110,25 +110,32 @@ public class TCHAdapterImpl implements AdapterImpl {
 
         parameters.getParameter().add(ppcSrs);
 
-        
         if (testCase.getTestEventList() != null) {
+
+            System.out.println("LENGTH OF TEST EVENT LIST: " + testCase.getTestEventList().size());
 
             for (int i = 0; i < testCase.getTestEventList().size(); i++) {
 
                 TestEvent testEvent = testCase.getTestEventList().get(i);
                 if (testEvent.getEvaluationActualList() != null) {
+                    System.out.println("LENGTH OF Evaluation actual list : " + testEvent.getEvaluationActualList().size());
+                } else {
+                    System.out.println("LENGTH OF Evaluation actual list : NULL");
+                }
+
+                CodeableConcept cconcept = new CodeableConcept();
+                Coding coding = new Coding();
+                if (testEvent.getEvent().getVaccineCvx() != null && !testEvent.getEvent().getVaccineCvx().isEmpty()) {
+                    coding.setCode(testEvent.getEvent().getVaccineCvx());
+                } else {
+                    coding.setCode(testEvent.getEvent().getVaccineMvx());
+                }
+                cconcept.getCoding().add(coding);
+                Immunization immunization = new Immunization();
+                // immunization.setId(UUID.randomUUID().toString());
+                immunization.setVaccineCode(cconcept);
+                if (testEvent.getEvaluationActualList() != null) {
                     List<EvaluationActual> actuals = testEvent.getEvaluationActualList();
-                    CodeableConcept cconcept = new CodeableConcept();
-                    Coding coding = new Coding();
-                    if (testEvent.getEvent().getVaccineCvx() != null && !testEvent.getEvent().getVaccineCvx().isEmpty()) {
-                        coding.setCode(testEvent.getEvent().getVaccineCvx());
-                    } else {
-                        coding.setCode(testEvent.getEvent().getVaccineMvx());
-                    }
-                    cconcept.getCoding().add(coding);
-                    Immunization immunization = new Immunization();
-                    // immunization.setId(UUID.randomUUID().toString());
-                    immunization.setVaccineCode(cconcept);
                     if (actuals.get(0) != null && actuals.get(0).getTestEvent() != null) {
                         immunization.setDate(actuals.get(0).getTestEvent().getEventDate());
                         System.out.println("There was a test event -- date pulled.");
@@ -149,11 +156,11 @@ public class TCHAdapterImpl implements AdapterImpl {
                             Coding code = new Coding();
                             code.setCode("Valid");
                             doseStatus.addCoding(code);
-                        } else if("N".equalsIgnoreCase(doseValidConcept.getCodingFirstRep().getCode())) {
+                        } else if ("N".equalsIgnoreCase(doseValidConcept.getCodingFirstRep().getCode())) {
                             doseStatus.setText("Not Valid");
                             Coding code = new Coding();
                             code.setCode("not valid");
-                            doseStatus.addCoding(code);                            
+                            doseStatus.addCoding(code);
                         } else {
                             // 2019/3/13: If it isn't Y or N, leave it blank
                             doseStatus.setText(" ");
@@ -161,7 +168,7 @@ public class TCHAdapterImpl implements AdapterImpl {
                             code.setCode(" ");
                             doseStatus.addCoding(code);
                         }
-                    
+
                         ivp.setDoseStatus(doseStatus);
                         //ivp.getTargetDisease().add(new CodeableConcept().setText("unknown"));
                         Coding cvxCoding = new Coding();
@@ -184,32 +191,31 @@ public class TCHAdapterImpl implements AdapterImpl {
                         immunization.getVaccinationProtocol().add(ivp);
 
                     }
+                }
+                Reference supportingImm = new Reference();
+                supportingImm.setResource(immunization);
 
-                    Reference supportingImm = new Reference();
-                    supportingImm.setResource(immunization);
+                ImmunizationRecommendationRecommendationComponent irrc = new ImmunizationRecommendationRecommendationComponent();
+                irrc.addSupportingImmunization(supportingImm);
 
-                    ImmunizationRecommendationRecommendationComponent irrc = new ImmunizationRecommendationRecommendationComponent();
-                    irrc.addSupportingImmunization(supportingImm);
-
-                    ir.addRecommendation(irrc);
-                    /*
+                ir.addRecommendation(irrc);
+                /*
                     ir.getContained().add(new Patient().setGender(AdministrativeGender.FEMALE));
 
                     ir.getContained().add(immunization);
 
                     ir.getRecommendation().add(new ImmunizationRecommendationRecommendationComponent().setDoseNumber(123));
-                     */
-                    //  ir.addContained(immunization);
-                    System.out.println(ir.getContained().size());
-                    //Resource resource = new Resource();
+                 */
+                //  ir.addContained(immunization);
+                System.out.println(ir.getContained().size());
+                //Resource resource = new Resource();
 /*
                     //ContainedComponent con = new ContainedComponent();
                     FhirContext ctx = FhirContext.forDstu3();
                     System.out.println("Current after adding 1 contained = \n" + ctx.newXmlParser().setPrettyPrint(false).encodeResourceToString(ir));
                     System.out.println("JSON = " + ctx.newJsonParser().encodeResourceToString(ir));
                     System.out.println("imm = " + ctx.newXmlParser().encodeResourceToString(immunization));
-                     */
-                }
+                 */
 
             }
             if (forecastActualList != null) {
@@ -489,10 +495,10 @@ public class TCHAdapterImpl implements AdapterImpl {
                 Iterator<Resource> it2 = resources.iterator();
                 while (it2.hasNext()) {
                     Resource resource = it2.next();
-                    if(resource instanceof Organization) {
-                        Organization mvxOrg = (Organization) resource;                     
+                    if (resource instanceof Organization) {
+                        Organization mvxOrg = (Organization) resource;
                         mvxCode = mvxOrg.getIdentifierFirstRep().getValue();
-                    }                    
+                    }
                 }
             }
 
@@ -526,11 +532,11 @@ public class TCHAdapterImpl implements AdapterImpl {
             forecastActualList = connector.queryForForecast(testCase, result);
             //System.out.println("TCH log = " + result.getLogText());             
             log = result.getLogText();
-            
+
             issues = result.getIssueList();
             System.out.println("Software Results Status = " + result.getSoftwareResultStatus());
             srs = result.getSoftwareResultStatus().toString();
-            
+
         } catch (Exception e) {
             e.printStackTrace();
             //todo: error handling
