@@ -134,13 +134,16 @@ public class TCHAdapterImpl implements AdapterImpl {
                 Immunization immunization = new Immunization();
                 // immunization.setId(UUID.randomUUID().toString());
                 immunization.setVaccineCode(cconcept);
+                immunization.setDate(testEvent.getEventDate());
                 if (testEvent.getEvaluationActualList() != null) {
                     List<EvaluationActual> actuals = testEvent.getEvaluationActualList();
-                    if (actuals.get(0) != null && actuals.get(0).getTestEvent() != null) {
-                        immunization.setDate(actuals.get(0).getTestEvent().getEventDate());
-                        System.out.println("There was a test event -- date pulled.");
-                    } else {
-                        System.out.println("There was NOT a test event -- date NOT pulled.");
+                    if (immunization.getDate() == null) {
+                        if (actuals.get(0) != null && actuals.get(0).getTestEvent() != null) {
+                            immunization.setDate(actuals.get(0).getTestEvent().getEventDate());
+                            System.out.println("There was a test event -- date pulled.");
+                        } else {
+                            System.out.println("There was NOT a test event -- date NOT pulled.");
+                        }
                     }
                     immunization.setPatient(new Reference().setReference("42"));
                     immunization.setNotGiven(false);
