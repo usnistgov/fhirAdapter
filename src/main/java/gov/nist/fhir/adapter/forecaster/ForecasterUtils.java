@@ -37,6 +37,7 @@ public class ForecasterUtils {
 
     public static Parameters run(Parameters inputParameters) {
 
+        String testCaseNumber = ForecasterUtils.parseTestCaseNumber(inputParameters);
         AdministrativeGender gender = ForecasterUtils.parsePatientGender(inputParameters);
         Date dob = ForecasterUtils.parsePatientDateOfBirth(inputParameters);
         Date assessmentDate = ForecasterUtils.parseAssessmentDate(inputParameters);
@@ -68,6 +69,7 @@ public class ForecasterUtils {
          */
         adapter = new TCHAdapterImpl();
 
+        adapter.setTestCaseNumber(testCaseNumber);
         adapter.setAssessmentDate(assessmentDate);
         adapter.setDateOfBirth(dob);
         adapter.setGender(gender);
@@ -261,6 +263,24 @@ public class ForecasterUtils {
         return stringType.getValue();
     }
 
+    public static String parseTestCaseNumber(Parameters inputParameters) {
+        ParametersParameterComponent testCaseNumberPC = ForecasterUtils.parseSingleParametersParameterComponent(inputParameters, Consts.PARAMETER_NAME_TEST_CASE_NUMBER);
+        if (testCaseNumberPC == null) {
+            return null;
+        }
+        Type value = testCaseNumberPC.getValue();
+        if (value == null) {
+            return null;
+        }
+        if (!(value instanceof StringType)) {
+            return null;
+        }
+        StringType stringType = (StringType) value;
+        return stringType.getValue();
+    }
+
+    
+    
     public static String convertIssuesToString(List<ForecastEngineIssue> issues) {
         if (issues == null) {
             return "";

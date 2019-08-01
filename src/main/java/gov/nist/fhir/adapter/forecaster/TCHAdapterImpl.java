@@ -57,6 +57,7 @@ import org.immregistries.vfa.connect.model.VaccineGroup;
  */
 public class TCHAdapterImpl implements AdapterImpl {
 
+    private String testCaseNumber = null;
     private AdministrativeGender gender = null;
     private Date dateOfBirth = null;
     private Date assessmentDate = null;
@@ -71,7 +72,7 @@ public class TCHAdapterImpl implements AdapterImpl {
     public Parameters run() {
 
         Software software = TCHAdapterImpl.createSoftware(this.getServiceType(), this.getServiceURL(), this.getUserId(), this.getFacilityId(), this.getPassword());
-        TestCase testCase = createTestCase(this.getGender(), this.getDateOfBirth(), this.getAssessmentDate(), this.getImmunizations());
+        TestCase testCase = createTestCase(this.getTestCaseNumber(), this.getGender(), this.getDateOfBirth(), this.getAssessmentDate(), this.getImmunizations());
         // List<TestEvent> events = testCase.getTestEventList();
 
         Parameters parameters = new Parameters();
@@ -464,9 +465,15 @@ public class TCHAdapterImpl implements AdapterImpl {
         return software;
     }
 
-    public static TestCase createTestCase(AdministrativeGender gender, Date dob, Date assessmentDate, List<Immunization> immunizations) {
+    public static TestCase createTestCase(String testCaseNumber, AdministrativeGender gender, Date dob, Date assessmentDate, List<Immunization> immunizations) {
         TestCase testCase = new TestCase();
 
+        
+        
+        testCase.setTestCaseNumber(testCaseNumber);
+        
+        System.out.println("TEST CASE NUMBER!!!! IS!!!!! " + testCase.getTestCaseNumber());
+        
         testCase.setEvalDate(assessmentDate);
         testCase.setPatientDob(dob);
         //TODO: double check this is correct
@@ -532,6 +539,7 @@ public class TCHAdapterImpl implements AdapterImpl {
             ConnectorInterface connector = ConnectFactory.createConnecter(software, VaccineGroup.getForecastItemList());
             SoftwareResult result = new SoftwareResult();
             connector.setLogText(true);
+            
             forecastActualList = connector.queryForForecast(testCase, result);
             //System.out.println("TCH log = " + result.getLogText());             
             log = result.getLogText();
@@ -760,6 +768,20 @@ ImmunizationRecommendation ir = new ImmunizationRecommendation();
      */
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    /**
+     * @return the testCaseNumber
+     */
+    public String getTestCaseNumber() {
+        return testCaseNumber;
+    }
+
+    /**
+     * @param testCaseNumber the testCaseNumber to set
+     */
+    public void setTestCaseNumber(String testCaseNumber) {
+        this.testCaseNumber = testCaseNumber;
     }
 
 }

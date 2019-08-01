@@ -28,6 +28,9 @@ public interface AdapterImpl {
     public Parameters run();
     
     
+    public String getTestCaseNumber();
+    public void setTestCaseNumber(String testCaseNumber);
+    
     /**
      * @return the gender
      */
