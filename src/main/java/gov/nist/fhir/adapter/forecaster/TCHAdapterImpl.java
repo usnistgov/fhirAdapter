@@ -468,7 +468,8 @@ public class TCHAdapterImpl implements AdapterImpl {
     public static TestCase createTestCase(String testCaseNumber, AdministrativeGender gender, Date dob, Date assessmentDate, List<Immunization> immunizations) {
         TestCase testCase = new TestCase();
 
-        
+        if(testCaseNumber == null)
+            testCaseNumber = "";
         
         testCase.setTestCaseNumber(testCaseNumber);
         
