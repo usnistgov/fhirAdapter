@@ -9,6 +9,7 @@
 
     <name>fhirAdapter</name>
     <repositories>
+        
         <repository>
             <id>oss-snapshots</id>
             <snapshots>
@@ -17,8 +18,36 @@
             <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
         </repository>
 
+
+        <repository>
+            <id>central</id>
+            <name>Central Repository</name>
+            <url>https://repo.maven.apache.org/maven2</url>
+            <layout>default</layout>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        
     </repositories>
 
+    <!-- Needed for HTTPS -->
+    <!--
+    <pluginRepositories>
+        <pluginRepository>
+            <id>central</id>
+            <name>Central Repository</name>
+            <url>https://repo.maven.apache.org/maven2</url>
+            <layout>default</layout>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <releases>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+        </pluginRepository>
+    </pluginRepositories>
+-->
     <properties>
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -37,10 +66,23 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.immregistries.vfa</groupId>
+            <groupId>org.immregistries</groupId>
             <artifactId>ForecastConnector</artifactId>
-            <version>3.15</version>
+            <!--
+            <version>3.19</version>
+            -->
+            <!--
+            <version>3.20.3</version>
+            -->
+            <!--
+            <version>3.20.4</version>
+            -->
+            <!--
+                <version>3.20.5</version>
+                -->
+                   <version>3.20.8</version>
         </dependency> 
+
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-web-api</artifactId>
@@ -52,21 +94,34 @@
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
             <artifactId>hapi-fhir-base</artifactId>
-            <version>3.8.0</version>
+            <version>5.7.9</version> <!-- 3.8.0 -->
         </dependency>
         <!-- https://mvnrepository.com/artifact/ca.uhn.hapi.fhir/hapi-fhir-structures-dstu3 -->
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
             <artifactId>hapi-fhir-structures-dstu3</artifactId>
-            <version>3.8.0</version>
+            <version>5.7.9</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/ca.uhn.hapi.fhir/hapi-fhir-jpaserver-base -->
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
             <artifactId>hapi-fhir-jpaserver-base</artifactId>
-            <version>3.8.0</version>
+            <version>5.7.9</version>
         </dependency>
+        
+        <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-reload4j -->
+    <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>2.0.7</version>
+    </dependency>
+    <dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-jdk14</artifactId>
+    <version>2.0.7</version>
+</dependency>
+
         
         <!--
                 <dependency>
@@ -93,10 +148,14 @@
 
     
 
-        
-        
+        <dependency>
+            <groupId>com.github.dnault</groupId>
+            <artifactId>xml-patch</artifactId>
+            <version>0.3.1</version>
+        </dependency>
+   
     </dependencies>
-
+        
     <build>
         <plugins>
             <plugin>
