@@ -61,4 +61,8 @@ fi
 if [ "$PUSH_DOCKERHUB" == "y" ];then
   docker push nist775hit/fits-fhir-adapter:$VERSION
   header_section "Image nist775hit/fits-fhir-adapter:$VERSION successfully pushed to DockerHub"
+  if [ "$AS_LATEST" == "y" ];then
+    docker push nist775hit/fits-fhir-adapter:latest
+    header_section "Image nist775hit/fits-fhir-adapter:latest successfully pushed to DockerHub"
+  fi
 fi
