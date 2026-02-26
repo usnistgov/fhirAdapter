@@ -8,12 +8,12 @@ package gov.nist.fhir.adapter;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
+
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  *
@@ -42,10 +42,14 @@ public class ImmunizationRecommendationService extends RestfulServer {
       
       resourceProviders.add(new ImmunizationRecommendationProvider());
       setResourceProviders(resourceProviders);
-      
-        //  List<Object> plainProviders=new ArrayList<Object>();
-    //plainProviders.add(new ImmunizationRecommendationProvider());
-    //setPlainProviders(plainProviders);
+        /*
+         * Logging interceptor
+         */
+      LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
+      loggingInterceptor.setMessageFormat("Source[${remoteAddr}] Operation[${operationType} ${idOrResourceName}] UA[${requestHeader.user-agent}] Params[${requestParameters}] BodyFhir\n${requestBodyFhir}");
+      loggingInterceptor.setLogExceptions(true);
+      loggingInterceptor.setLoggerName(ImmunizationRecommendationService.class.getName());
+      registerInterceptor(loggingInterceptor);
       
    }
     
