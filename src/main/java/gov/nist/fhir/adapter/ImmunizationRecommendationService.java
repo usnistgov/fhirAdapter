@@ -9,6 +9,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,28 +30,31 @@ public class ImmunizationRecommendationService extends RestfulServer {
 	}
     
     @Override
-       protected void initialize() throws ServletException {
-           
-           System.out.println("===> Initializing FHIR Servlet!");
-           
-      /*
-       * The servlet defines any number of resource providers, and
-       * configures itself to use them by calling
-       * setResourceProviders()
-       */
-      List<IResourceProvider> resourceProviders = new ArrayList<IResourceProvider>();
-      
-      resourceProviders.add(new ImmunizationRecommendationProvider());
-      setResourceProviders(resourceProviders);
+    protected void initialize() throws ServletException {
+        System.out.println("===> Initializing FHIR Servlet!");
+        /*
+         * The servlet defines any number of resource providers, and
+         * configures itself to use them by calling
+         * setResourceProviders()
+         */
+        List<IResourceProvider> resourceProviders = new ArrayList<IResourceProvider>();
+
+        resourceProviders.add(new ImmunizationRecommendationProvider());
+        setResourceProviders(resourceProviders);
         /*
          * Logging interceptor
          */
-      LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
-      loggingInterceptor.setMessageFormat("Source[${remoteAddr}] Operation[${operationType} ${idOrResourceName}] UA[${requestHeader.user-agent}] Params[${requestParameters}] BodyFhir\n${requestBodyFhir}");
-      loggingInterceptor.setLogExceptions(true);
-      loggingInterceptor.setLoggerName(ImmunizationRecommendationService.class.getName());
-      registerInterceptor(loggingInterceptor);
-      
-   }
+        LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
+        loggingInterceptor.setMessageFormat("Source[${remoteAddr}] Operation[${operationType} ${idOrResourceName}] UA[${requestHeader.user-agent}] Params[${requestParameters}] BodyFhir\n${requestBodyFhir}");
+        loggingInterceptor.setLogExceptions(true);
+        loggingInterceptor.setLoggerName(ImmunizationRecommendationService.class.getName());
+        registerInterceptor(loggingInterceptor);
+
+        /*
+         * Makes the content readable for browser requests
+         */
+        ResponseHighlighterInterceptor responseHighlighterInterceptor = new ResponseHighlighterInterceptor();
+        registerInterceptor(responseHighlighterInterceptor);
+    }
     
 }
