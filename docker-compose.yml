@@ -1,0 +1,7 @@
+services:
+  fhir_adapter:
+    build: .
+    container_name: fhir_adapter_container
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
