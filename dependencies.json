@@ -1,0 +1,16 @@
+{
+  "dependencies": [
+    {
+      "name": "Forecast Connector",
+      "repository": "https://github.com/immregistries/VaccineForecastConnector",
+      "sha1": "ff8008bace76612429f2d07db0389959cb0c98c1",
+      "cmd": "mvn clean install"
+    },
+    {
+      "name": "FHIR Lib",
+      "repository": "https://github.com/usnistgov/fhirLib",
+      "sha1": "f619a839d46a8babdba5ccc0652cf6a1d35db209",
+      "cmd": "mvn clean install"
+    }
+  ]
+}
