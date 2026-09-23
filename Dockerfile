@@ -32,4 +32,13 @@ RUN sed -i '/<\/web-app>/i \
       <location>/error.html<\/location>\n\
     <\/error-page>\n' /usr/local/tomcat/conf/web.xml
 COPY ./error.html /usr/local/tomcat/webapps/ROOT/error.html
+
+# Application logs to stdout. Tomcat sends the webapp's own logger (servlet
+# exceptions, Spring startup failures) to a dated file under logs/ that no
+# container platform reads. Add the console handler next to the file handler
+# so the same lines reach whatever collects stdout.
+RUN set -eux; \
+    F=/usr/local/tomcat/conf/logging.properties; \
+    sed -i 's#^\(org\.apache\.catalina\.core\.ContainerBase\.\[Catalina\]\.\[localhost\]\.handlers = \)2localhost\.org\.apache\.juli\.AsyncFileHandler$#\12localhost.org.apache.juli.AsyncFileHandler, java.util.logging.ConsoleHandler#' "$F"; \
+    grep -q '^org\.apache\.catalina\.core\.ContainerBase\.\[Catalina\]\.\[localhost\]\.handlers = 2localhost\.org\.apache\.juli\.AsyncFileHandler, java\.util\.logging\.ConsoleHandler$' "$F"
 COPY --from=fhir-adapter-builder ./target/fhirAdapter.war /usr/local/tomcat/webapps/fhirAdapter.war
