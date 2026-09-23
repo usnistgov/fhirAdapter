@@ -5,3 +5,20 @@ services:
     ports:
       - "8080:8080"
     restart: unless-stopped
+    healthcheck:
+      # 1. /metadata must return 200 and a CapabilityStatement declaring cds-forecast
+      # 2. the $cds-forecast operation itself must be routed (anything but 404 / 5xx)
+      test:
+        - CMD-SHELL
+        - >
+          curl -fsS -H 'Accept: application/fhir+json'
+          http://localhost:8080/fhirAdapter/fhir/metadata
+          | grep -q 'cds-forecast'
+          && code=$$(curl -s -o /dev/null -w '%{http_code}'
+          -H 'Accept: application/fhir+json'
+          'http://localhost:8080/fhirAdapter/fhir/$$cds-forecast')
+          && [ "$$code" != "404" ] && [ "$$code" -lt 500 ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
